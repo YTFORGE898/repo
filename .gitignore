@@ -5,3 +5,4 @@
 *.synctex.gz
 .ipynb_checkpoints/
 thesis.pdf
+thesis.out
