@@ -1,0 +1,117 @@
+\documentclass[11pt,a4paper]{report}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%-----------------------PAGE SETTINGS----------------------------%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage[utf8]{inputenc}
+\usepackage[a4paper,top=1in,bottom=1in,left=1.15in,right=1.15in]{geometry}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%--------------------------PREAMBLE------------------------------%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{graphicx}
+\usepackage{pdfpages}
+\usepackage{anyfontsize}
+\usepackage{setspace}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{titlesec}
+\usepackage{xcolor}
+\usepackage[colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue]{hyperref}
+\newtheorem{theorem}{Theorem}[chapter]
+\titleformat{\chapter}[hang]
+{\normalfont\LARGE\bfseries}
+{\thechapter}
+{1em}
+{}
+
+\titlespacing*{\chapter}{0pt}{-10pt}{18pt}
+
+\titleformat{\section}[hang]
+{\normalfont\large\bfseries}
+{\thesection}
+{1em}
+{}
+
+\titlespacing*{\section}{0pt}{14pt}{8pt}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%-----------------------CUSTOM COMMANDS--------------------------%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\textBF}[1]{%
+    \pdfliteral direct {2 Tr 1 w}
+     #1%
+    \pdfliteral direct {0 Tr 0 w}%
+}
+
+\newcommand{\textDF}[1]{%
+    \pdfliteral direct {2 Tr 0.2 w}
+     #1%
+    \pdfliteral direct {0 Tr 0 w}%
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%-----------------------DOCUMENT BEGIN---------------------------%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+
+\newgeometry{margin=0.01cm}
+\begin{titlepage}
+\thispagestyle{empty}
+\title{
+\includegraphics[width=19cm]{Extras/Mathlogo.PNG} \\
+\vspace{3cm}
+\begingroup
+\fontsize{28}{34}\selectfont
+\setstretch{1.05}
+\parbox{15.5cm}{\textBF{Randomized approaches to approximating solutions of large kernel systems for Kernel Ridge Regression using the Nystr\"om method}}
+\endgroup}
+\date{}
+\author{}
+\maketitle
+\vspace{-1.5cm}
+\hspace{4cm}\parbox[b][15cm][b]{8cm}{\textDF{\large\setstretch{1.5}
+Bachelor's Project Mathematics\\
+April 2026\\
+Student: Y. Tao\\
+First supervisor: Dr. M. Meier\\
+Second supervisor: Dr. A. Smith}}
+\end{titlepage}
+\restoregeometry
+\clearpage
+
+\chapter*{Abstract}
+Kernel ridge regression leads to a linear system involving the full kernel matrix $K$. This matrix has size $n \times n$, so forming and storing it becomes expensive when the number of data points is large. This project studies randomized Nystr\"om approximations, where only $l \ll n$ columns of $K$ are used to build a low-rank approximation. The aim is to compare how the choice of sampled columns and the number of sampled columns affect accuracy, runtime, memory use, conditioning, and solver behaviour.
+
+\clearpage
+
+\tableofcontents
+
+\clearpage
+
+\input{chapters/01_introduction}
+\input{chapters/02_krr}
+\input{chapters/03_nystrom}
+
+\clearpage
+
+\begin{thebibliography}{99}
+
+\bibitem[Calandriello et al.(2017)]{calandriello2017distributed} Calandriello, D., Lazaric, A., and Valko, M. (2017). Distributed adaptive sampling for kernel matrix approximation. In \emph{Proceedings of the 20th International Conference on Artificial Intelligence and Statistics}.
+
+\bibitem[Drineas and Mahoney(2005)]{drineas2005nystrom} Drineas, P. and Mahoney, M. W. (2005). On the Nystrom method for approximating a Gram matrix for improved kernel-based learning. \emph{Journal of Machine Learning Research}, 6, 2153--2175.
+
+\bibitem[El Alaoui and Mahoney(2015)]{elalaoui2015fast} El Alaoui, A. and Mahoney, M. W. (2015). Fast randomized kernel methods with statistical guarantees. In \emph{Advances in Neural Information Processing Systems}.
+
+\bibitem[Gittens and Mahoney(2016)]{gittens2016nystrom} Gittens, A. and Mahoney, M. W. (2016). Revisiting the Nystrom method for improved large-scale machine learning. \emph{Journal of Machine Learning Research}, 17, 1--65.
+
+\bibitem[Martinsson and Tropp(2020)]{martinsson2021randomized} Martinsson, P.-G. and Tropp, J. A. (2020). Randomized numerical linear algebra: foundations and algorithms. \emph{Acta Numerica}.
+
+\bibitem[Zhu(2025)]{zhu2025rkhs} Zhu, R. (2025). Reproducing kernel Hilbert space. \emph{Statistical Machine Learning with R}.
+
+\bibitem[Hamidieh(2018)]{hamidieh2018superconductivity} Hamidieh, K. (2018). Superconductivty Data. UCI Machine Learning Repository. DOI: 10.24432/C53P47.
+
+\end{thebibliography}
+
+\end{document}

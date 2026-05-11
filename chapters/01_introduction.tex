@@ -1,0 +1,21 @@
+\chapter{Introduction}
+
+Many regression problems start with data $(x_i,y_i)$ for $i=1,\ldots,n$, where $x_i\in\mathbb{R}^d$ are inputs and $y_i\in\mathbb{R}$ are outputs. We would like to use these data to create a model for the relationship between the $x$ and $y$. One formulation of this task is kernel ridge regression, where the final computation is written using a kernel matrix. The details of this formulation are introduced in Chapter 2.
+
+For large datasets, the main computational difficulty is the need to explicitly form the full matrix $K$, which costs $O(n^2)$ time and memory. This is the part that becomes infeasible first and takes the most time and resources. Solving the resulting system directly can also cost about $O(n^3)$ operations, so this is fine for small tests, but not realistic when $n$ becomes large.
+
+Therefore in this project we investigate the Nystr\"om approximation of the kernel matrix: instead of forming all of $K$, we only form $l\ll n$ sampled columns and the corresponding $l\times l$ submatrix and make an approximation $\tilde K\approx K$. This is a randomized approach for kernel matrices \cite{drineas2005nystrom,gittens2016nystrom}. The point is to reduce the computational cost while still keeping enough information from the original kernel matrix.
+
+Nystr\"om needs a set of $l$ columns to build $\tilde K$. The simplest choice is uniform random sampling, i.e. pick columns uniformly at random. Smarter strategies try to pick columns that are more informative so that fewer columns are needed for similar accuracy. One idea is to sample according to ridge leverage scores, which give higher probability to points that matter more for the kernel ridge regression solution \cite{elalaoui2015fast}. Another idea is to approximate these leverage type probabilities adaptively without ever constructing the whole $K$ \cite{calandriello2017distributed}.
+
+This project is therefore about how to decide which columns to sample and how many columns $l$ are needed for a good Nystr\"om approximation in the KRR setting. I will compare different sampling strategies, starting from uniform random sampling as a baseline, and then comparing against smarter strategies motivated by the literature. The experiments will compare these strategies in terms of prediction accuracy and computational complexity, such as runtime and memory, as $l$ changes.
+
+The research questions are:
+\begin{itemize}
+\item What Nystr\"om column sampling strategies give good performance for KRR in terms of prediction accuracy vs runtime/memory?
+\item How large does $l$ need to be to get a good approximation, and how does this depend on the sampling strategy and $\lambda$?
+\item What do the accuracy and cost (runtime/memory) trade-offs look like when $l$ increases, and can we recommend a reasonable approach?
+\item How do conditioning and solver convergence relate to $\lambda$ and the Nystr\"om approximation quality?
+\end{itemize}
+
+This thesis is organised as follows. Chapter 2 introduces kernel ridge regression and the kernel matrices used in the project. It also gives the first singular value experiments, which motivate why a low-rank approximation is a reasonable thing to try. Chapter 3 introduces the Nystr\"om approximation, starting from the general positive semidefinite matrix formula and then moving to column sampling. 
