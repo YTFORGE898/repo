@@ -134,50 +134,55 @@ A kernel matrix is useful for Nystr\"om approximation when its singular values d
 
 For this real data experiment we use the Superconductivity dataset from the UCI Machine Learning Repository. This is a regression dataset with $21263$ samples and $81$ numerical input features, and the output is the critical temperature. This fits the KRR setting since the target variable is continuous.
 
-This dataset is also large enough to show the computational problem. If the full dataset is used, the kernel matrix has size
-\[
-21263\times 21263.
-\]
-This means there are
-\[
-21263^2=452115169
-\]
-entries in $K$. If these entries are stored in double precision, then just storing one dense kernel matrix takes about
-\[
-452115169\cdot 8\text{ bytes}\approx 3.6\text{ GB}.
-\]
+This dataset is also large enough to show the computational problem. If the full dataset is used, the kernel matrix has size $n\times n$ where $n=21,263$, this means there are $n^2 \approx 10^8$ entries in $K$ which corresponds to about 3.6 GB in memory, not to mention the construction computational cost. 
+
 This is before solving the linear system or computing any decomposition. So the full matrix is already expensive, and this is the reason that an approximation method such as Nystr\"om is relevant.
 
-The first singular value experiment uses the linear kernel
+We now look at the singular values of three kernels linear, polynomial, and Gaussian RBF. The singular values are computed using the full kernel matrix, so this is just a check of the low-rank structure. The point is to see whether the singular values decay in practice for real data. 
+
+For the singular value plots, the singular values are normalised by the largest singular value, so the plotted quantity is
 \[
-k(x,z)=x^Tz.
+\frac{\sigma_i(K)}{\sigma_1(K)}.
 \]
-For a data matrix $X\in\mathbb{R}^{n\times d}$, this gives
-\[
-K=XX^T.
-\]
-In the Superconductivity dataset $d=81$, so the linear kernel matrix satisfies
-\[
-\operatorname{rank}(K)\leq 81.
-\]
-Therefore for the linear kernel, at most $81$ singular values can be nonzero. This is a simple case where the low-rank structure is built into the kernel matrix. It is still a useful first check because it shows directly how the dimension of the data can limit the rank of $K$.
+This makes the three kernels easier to compare since all three curves start at $1$. The plots are also stopped once the singular values reach around $10^{-16}$, since after that the remaining tail is python or machine precision.
 
 \begin{figure}[h]
 \centering
-\IfFileExists{Results/sing_vals_linear_kernel.pdf}{\includegraphics[width=0.75\textwidth]{Results/sing_vals_linear_kernel.pdf}}{\fbox{Run the singular value experiment to create this figure}}
-\caption{Singular values of a kernel matrix from the Superconductivity dataset using the linear kernel.}
-\label{fig:singular-linear}
+\IfFileExists{Results/sing_val_three_kernels.pdf}{\includegraphics[width=0.98\textwidth]{Results/sing_val_three_kernels.pdf}}{\fbox{Run the singular value experiment to create this figure}}
+\caption{Normalised singular value decay for the three kernel matrices: (a) linear, (b) polynomial and (c) RBF.}
+\label{tsv}
 \end{figure}
 
-I also compare this with the Gaussian RBF kernel
-\[
-k(x,z)=\exp(-\gamma\|x-z\|_2^2).
-\]
-For this kernel the rank is not limited by $d$ in the same simple way. The singular value decay depends on the geometry of the data and on the parameter $\gamma$. This makes the RBF kernel more interesting for checking whether the singular values still decay in practice.
+Figure \ref{tsv} compares the three kernels used in this project. Figure \ref{tsv}(a) shows the linear kernel. Since $K=XX^T$ for a linear kernel and the data have $81$ features, the rank is at most $81$, so the singular values drop to zero after that point. Figure \ref{tsv}(b) shows the polynomial kernel. This kernel is still based on inner products, but the square introduces nonlinear factors, so its spectrum does not have the same clean cut-off as the linear kernel. Figure \ref{tsv}(c) shows the RBF kernel. Here the decay depends more on the geometry of the data and the value of $\gamma$, so this is the most interesting case out of all three kernels. % Change second kernel maybe in the future.
+
+\section{Runtime and Accuracy experiments}
+
+We now check the computational cost in this section. Constructing a full kernel matrix means evaluating pairwise similarities between observations so the expected cost is quadratic in $n$. Solving the full KRR has cubic asymptotic cost if we use Cholesky or some other direct solver. However in the tested range the construction of $K$ can still take longer than the solve. This does not contradict the asymptotic costs. It just means the $O(n^2)$ construction curve can start much higher since every kernel entry has to be evaluated and stored while the solve is done by highly optimized linear algebra methods. In practice construction is almost always more expensive than the solve.
 
 \begin{figure}[h]
 \centering
-\IfFileExists{Results/sing_vals_rbf_kernel.pdf}{\includegraphics[width=0.75\textwidth]{Results/sing_vals_rbf_kernel.pdf}}{\fbox{Run the singular value experiment to create this figure}}
-\caption{Singular values of a kernel matrix from the Superconductivity dataset using the Gaussian RBF kernel.}
-\label{fig:singular-rbf}
+\IfFileExists{Results/kernel_construction_time.pdf}{\includegraphics[width=0.72\textwidth]{Results/kernel_construction_time.pdf}}{\fbox{Run the singular value experiment to create this figure}}
+\caption{Time to construct the full kernel matrix for different values of $n$.}
+\label{kst}
 \end{figure}
+
+Figure \ref{kst} shows the construction time for the linear, polynomial and RBF kernels. The general behaviour follows the expected quadratic growth, but the constants are not the same. RBF kernel is slower since it is a more complex function than the other two.
+
+\begin{figure}[h]
+\centering
+\IfFileExists{Results/construct_vs_solve_time.pdf}{\includegraphics[width=0.72\textwidth]{Results/construct_vs_solve_time.pdf}}{\fbox{Run the singular value experiment to create this figure}}
+\caption{Comparison of the time to construct $K$ and the time to solve the full KRR system.}
+\label{cvs}
+\end{figure}
+
+Figure \ref{cvs} compares the time to construct the RBF kernel matrix with the time to solve $(K+\lambda I)\alpha=y$. The construction time is larger for the increasing values of $n$ which agrees with the theoretical expectation we have discussed above. This is one of the main reasons why column sampling is important: if only $l$ columns are sampled, then we can build $K_{:,I}$ and $K_{I,I}$ instead of all of $K$ which we will see in Chapter 3.
+
+For the regression part, we fix a train/test split and first vary the regularization parameter $\lambda$. The metric is MSE (mean squared error).
+
+\begin{figure}[h]
+\centering
+\IfFileExists{Results/mse_vs_lambda.pdf}{\includegraphics[width=0.72\textwidth]{Results/mse_vs_lambda.pdf}}{\fbox{Run the singular value experiment to create this figure}}
+\caption{Test MSE for full KRR as $\lambda$ changes.}
+\label{mvl}
+\end{figure}
+

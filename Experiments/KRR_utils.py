@@ -17,6 +17,12 @@ def rbf(X, Z, gamma=0.1):
     return K
 
 def make_kernel_matrix(data, kernel):
-    K = kernel(data, data)
-    K = (K + K.T)/2
+    n = data.shape[0]
+    K = np.empty((n, n))
+
+    for i in range(n):
+        values = kernel(data[i:i+1], data[i:]).reshape(-1)
+        K[i, i:] = values
+        K[i:, i] = values
+
     return K
