@@ -186,3 +186,22 @@ For the regression part, we fix a train/test split and first vary the regulariza
 \label{mvl}
 \end{figure}
 
+Figure \ref{mvl} shows we also study the choice of $\lambda$. Both very small or very large $\lambda$ give less stable fits, this is as expected since small lambda underregularizes which causes overfitting, and large lambda overregularizes which causes underfitting. The best value in this small experiment is in the middle of the tested range at roughly $\lambda = 0.1$.
+
+Finally, we fix the test set and use increasingly larger subsets of the training set. This checks both the prediction error and the runtime as the number of training observations grows.
+
+\begin{figure}[h]
+\centering
+\IfFileExists{Results/mse_vs_train_size.pdf}{\includegraphics[width=0.72\textwidth]{Results/mse_vs_train_size.pdf}}{\fbox{Run the singular value experiment to create this figure}}
+\caption{Test MSE as the number of training observations increases.}
+\label{mvt}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\IfFileExists{Results/runtime_vs_train_size.pdf}{\includegraphics[width=0.72\textwidth]{Results/runtime_vs_train_size.pdf}}{\fbox{Run the singular value experiment to create this figure}}
+\caption{Runtime as the number of training observations increases.}
+\label{tvt}
+\end{figure}
+
+Figures \ref{mvt} and \ref{tvt} show the basic trade off. More training observations can improve the test error but the runtime increases at the same time. This is the practical situation where Nystr\"om becomes very useful: ideally we want to keep majority of the predictive information while avoiding the computational cost of dealing with the full kernel matrix.
