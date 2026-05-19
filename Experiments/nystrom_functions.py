@@ -16,3 +16,52 @@ def random_nystrom(A, k, l, rng):
     Ahat = U1 @ np.diag(lam) @ U1.T
     return U1, lam, Ahat
 
+def uniform_sampling(n, l, rng):
+    # least informed
+    sample_ind = rng.choice(n, size=l, replace=False)
+    return sample_ind
+
+def nystrom_CWCT(K, sample_ind):
+    # C W^dagger C^T
+    C = K[:, sample_ind]
+    W = K[np.ix_(sample_ind, sample_ind)]
+    K_tilde = C @ np.linalg.pinv(W) @ C.T
+    return K_tilde
+
+def sample_from_scores(scores, l, rng):
+    # turn the scores into probabilities then sample
+    probs = scores / scores.sum()
+    sample_ind = rng.choice(len(scores), size=l, replace=False, p=probs)
+    return sample_ind
+
+def full_leverage(K, r, l, rng):
+    # therotical max
+    val, vec = np.linalg.eigh(K)
+    U1 = vec[:, -r:]
+    n = U1.shape[0]
+    scores = np.zeros(n)
+    
+    for i in range(n):
+        row = U1[i, :]
+        scores[i] = np.sum(row ** 2)
+
+    sample_ind = sample_from_scores(scores, l, rng)
+    return sample_ind, scores
+
+def approximate_leverage(K, ini_l, extra_l, rng):
+    # assumed formation of all K need to optimise later
+    n = K.shape[0]
+    ini_ind = uniform_sampling(n, ini_l, rng)
+    K1 = K[:, ini_ind]
+    U, sigma, VT = np.linalg.svd(K1, full_matrices=False)
+    n = U.shape[0]
+    scores = np.zeros(n)
+    
+    for i in range(n):
+        row = U[i, :]
+        scores[i] = np.sum(row ** 2)
+
+    scores[ini_ind] = 0
+    extra_ind = sample_from_scores(scores, extra_l, rng)
+    sample_ind = np.concatenate([ini_ind, extra_ind])
+    return sample_ind, scores, ini_ind
