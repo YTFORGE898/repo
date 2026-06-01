@@ -166,10 +166,79 @@ Thus in this project randomness enters through the random choice of the index se
 
 The baseline method is uniform sampling. This means choosing $l$ column indices from $\{1,\ldots,n\}$ uniformly at random. It is easy to implement and cheap because no importance scores have to be computed. Its weakness is that it treats all columns equally. If some columns are much more informative than others, uniform sampling may need a larger $l$ to reach the same accuracy as a smarter strategy.
 
+Before stating the theorem for this, we need the idea of coherence. Let $K$ be a positive semidefinite kernel matrix and let $K=U\Lambda U^T$ be its eigendecomposition. Let $U_k\in\mathbb{R}^{n\times k}$ contain the leading $k$ eigenvectors. The leverage score of row or column $i$ relative to this $k$-dimensional eigenspace is $s_i=\|U_k(i,:)\|_2^2.$
+These scores satisfy $\sum_{i=1}^n s_i=k.$
+
+This measures how concentrated the leading eigenspace is in a few rows. If the scores are all similar, then $\mu$ is not large and uniform sampling has a better chance of working. If a few scores are much larger than the rest, then uniform sampling can easily miss important columns.
+
 This issue is discussed by Gittens and Mahoney. In some datasets the leverage scores are fairly uniform so uniform sampling can be reasonable. In other datasets the leverage scores are highly nonuniform and uniform sampling can be much worse \cite{gittens2016nystrom}. This is why uniform sampling is a natural baseline method but not necessarily the best method.
+
+\begin{theorem}[Uniform sampling and coherence]
+Let $K\in\mathbb{R}^{n\times n}$ be positive semidefinite, and let $K_k$ be its best rank $k$ approximation. Fix a failure probability $\delta$ and an accuracy factor $\epsilon$ both in $(0,1)$. Suppose $l$ columns are sampled uniformly at random. In the basic Nystr\"om method we are using here, this corresponds to the $q=1$ case of Lemma 8 in Gittens and Mahoney, so
+\[
+C=KS=K_{:,I},\qquad W=S^TKS=K_{I,I}.
+\]
+If
+\[
+l\geq 2\mu\epsilon^{-2}k\ln(k/\delta),
+\]
+then, with probability at least $1-3\delta$, the Nystr\"om approximation $\tilde K=CW^\dagger C^T$ satisfies the spectral norm bound
+\[
+\|K-\tilde K\|_2 \leq \left(1+\frac{n}{(1-\epsilon)l}\right)\|K-K_k\|_2.
+\]
+\end{theorem}
+
+This bound for $l$ fits the intuition as it shows us when $\mu$ is large we need to sample more columns. This is exactly the point that uniform sampling does not know which columns are important so when the coherence is large it needs more columns to capture the essential structure.
 
 In the first experiments we test uniform sampling. For each $l$, the approximation quality can be measured directly by a relative forward error, for example
 \[
 \frac{\|K-\tilde K\|_F}{\|K\|_F}.
 \]
 It is also important to measure the effect on prediction. So the approximation is also judged by what happens when $\tilde K$ is used in place of $K$ in the regularized system, this is done by solving the system with $\tilde K$ and then measuring the test error of the result.
+
+\section{Leverage score sampling}
+
+Uniform sampling is cheap but it ignores the structure of $K$. Leverage score sampling is the opposite extreme, it tries to sample columns according to how important they are in the leading eigenspace.
+
+The full leverage score version is the most informed method. It uses all of $K$ first:
+\begin{enumerate}
+\item construct the full kernel matrix $K$;
+\item compute the leading eigenvectors $U_k$;
+\item compute the squared row norms $s_i=\|U_k(i,:)\|_2^2$;
+\item compute probabilities $p_i=\frac{s_i}{\sum_j s_j}$;
+\item sample columns according to these probabilities.
+\end{enumerate}
+
+This method is expensive because it requires the full matrix and the leading eigenvectors. But it is still useful as a reference method. It says what the informed sampling distribution would be if the important eigenspace was already known.
+
+\begin{theorem}[Leverage score sampling]
+Let $K\in\mathbb{R}^{n\times n}$ be positive semidefinite and let $U_k$ contain the leading $k$ eigenvectors. Suppose columns are sampled with probabilities satisfying
+\[
+p_i\geq\frac{\beta}{k}\|U_k(i,:)\|_2^2
+\]
+for some $\beta\in(0,1]$. If the number of sampled columns has order
+\[
+l=O\left(\frac{k\log(k/\beta)}{\beta\epsilon^2}\right),
+\]
+then the Nystr\"om approximation satisfies 
+\[
+\|K-\tilde K\|_2 \leq \|K-K_k\|_2+\epsilon^2\|K-K_k\|_*,
+\]
+where $\epsilon$ is a fixed approximation factor.
+\end{theorem}
+
+The important thing here is the dependence on $l$. Uniform sampling has a coherence factor while leverage score sampling samples according to the row norm scores. This can cause leverage score sampling to use much fewer columns when the leverage scores are very uneven.
+
+\section{Approximate leverage score sampling}
+
+The full leverage score method is too expensive if the whole reason for Nystr\"om is to avoid working with all of $K$. The middle method is therefore to look at a small part of $K$ first and use it to estimate which rows or columns look important.
+
+Here is a simple version of this idea:
+\begin{enumerate}
+\item sample $5$ columns uniformly;
+\item form the small sampled matrix $K_s\in\mathbb{R}^{n\times 5}$;
+\item compute an orthonormal basis $U_s$ for the column space of $K_s$;
+\item compute approximate scores as before.
+\item sample $95$ more columns (total $100$ columns) according to these approximate scores.
+\end{enumerate}
+

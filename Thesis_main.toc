@@ -10,3 +10,5 @@
 \contentsline {section}{\numberline {3.2}Column sampling}{12}{section.3.2}%
 \contentsline {section}{\numberline {3.3}Randomized Nystr\"om approximation}{13}{section.3.3}%
 \contentsline {section}{\numberline {3.4}Uniform sampling}{13}{section.3.4}%
+\contentsline {section}{\numberline {3.5}Leverage score sampling}{14}{section.3.5}%
+\contentsline {section}{\numberline {3.6}Approximate leverage score sampling}{15}{section.3.6}%
