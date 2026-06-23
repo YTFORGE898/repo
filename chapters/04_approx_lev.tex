@@ -1,0 +1,12 @@
+\chapter{Approximate leverage score sampling}
+
+The full leverage score method is too expensive if the whole reason for Nystr\"om is to avoid working with all of $K$. The middle method is therefore to look at a small part of $K$ first and use it to estimate which rows or columns look important.
+
+Here is a simple version of this idea:
+\begin{enumerate}
+\item sample $5$ columns uniformly;
+\item form the small sampled matrix $K_s\in\mathbb{R}^{n\times 5}$;
+\item compute an orthonormal basis $U_s$ for the column space of $K_s$;
+\item compute approximate scores as before.
+\item sample $95$ more columns (total $100$ columns) according to these approximate scores.
+\end{enumerate}

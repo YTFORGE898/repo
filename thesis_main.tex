@@ -18,6 +18,7 @@
 \usepackage{amsthm}
 \usepackage{titlesec}
 \usepackage{xcolor}
+\usepackage{natbib}
 \usepackage[colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue]{hyperref}
 \newtheorem{theorem}{Theorem}[chapter]
 \titleformat{\chapter}[hang]
@@ -76,7 +77,7 @@ Bachelor's Project Mathematics\\
 April 2026\\
 Student: Y. Tao\\
 First supervisor: Dr. M. Meier\\
-Second supervisor: Dr. A. Smith}}
+Second supervisor: Prof. J.G. Peypouquet}}
 \end{titlepage}
 \restoregeometry
 \clearpage
@@ -93,36 +94,12 @@ Kernel ridge regression leads to a linear system involving the full kernel matri
 \input{chapters/01_introduction}
 \input{chapters/02_krr}
 \input{chapters/03_nystrom}
+\input{chapters/04_approx_lev}
 
 \clearpage
 
 
 \bibliographystyle{apalike} %siam
 \bibliography{bibliography}
-
-\begin{thebibliography}{99}
-
-\bibitem[Calandriello et al.(2017)]{calandriello2017distributed}
-Calandriello, D., Lazaric, A., \& Valko, M. (2017). Distributed adaptive sampling for kernel matrix approximation. In A. Singh \& J. Zhu (Eds.), \emph{Proceedings of the 20th International Conference on Artificial Intelligence and Statistics} (Vol. 54, pp. 1421--1429). PMLR.
-
-\bibitem[Drineas and Mahoney(2005)]{drineas2005nystrom}
-Drineas, P., \& Mahoney, M. W. (2005). On the Nystr\"om method for approximating a Gram matrix for improved kernel-based learning. \emph{Journal of Machine Learning Research, 6}, 2153--2175.
-
-\bibitem[El Alaoui and Mahoney(2015)]{elalaoui2015fast}
-El Alaoui, A., \& Mahoney, M. W. (2015). Fast randomized kernel ridge regression with statistical guarantees. In \emph{Advances in Neural Information Processing Systems 28}.
-
-\bibitem[Gittens and Mahoney(2016)]{gittens2016nystrom}
-Gittens, A., \& Mahoney, M. W. (2016). Revisiting the Nystr\"om method for improved large-scale machine learning. \emph{Journal of Machine Learning Research, 17}(117), 1--65.
-
-\bibitem[Martinsson and Tropp(2020)]{martinsson2021randomized}
-Martinsson, P.-G., \& Tropp, J. A. (2020). Randomized numerical linear algebra: Foundations and algorithms. \emph{Acta Numerica, 29}, 403--572. https://doi.org/10.1017/S0962492920000021
-
-\bibitem[Zhu(2023)]{zhu2025rkhs}
-Zhu, R. (2023). Reproducing kernel Hilbert space. In \emph{Statistical Machine Learning with R}.
-
-\bibitem[Hamidieh(2018)]{hamidieh2018superconductivity}
-Hamidieh, K. (2018). \emph{Superconductivty Data} [Dataset]. UCI Machine Learning Repository. https://doi.org/10.24432/C53P47
-
-\end{thebibliography}
 
 \end{document}

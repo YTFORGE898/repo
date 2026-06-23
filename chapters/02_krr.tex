@@ -1,20 +1,44 @@
 \chapter{Kernel Ridge Regression}
 
+In this chapter we introduce the kernel ridge regression problem that lays the foundation for this project. First, the regression problem is written as an optimization problem over a reproducing kernel Hilbert space. Then the representer theorem is used to turn this function-space problem into a finite-dimensional problem involving the kernel matrix. Finally, we introduce the kernels used in the experiments and give some numerical checks that motivate using low-rank approximations.
+
 \section{Introduction to the regression problem}
 
-In this section we introduce the regression problem that will be used throughout the project. Assume we have a dataset $(x_i,y_i)$ for $i=1,\ldots,n$ where $x_i\in\mathbb{R}^d$ are inputs and $y_i\in\mathbb{R}$ are outputs. We would like to use these data to create a model for the relationship between the $x$ and $y$. In ordinary linear regression one searches over linear functions of the input variables. Kernel ridge regression instead searches over a reproducing kernel Hilbert space $\mathcal{H}$, which allows nonlinear functions to be represented through a kernel function.
+In this section we introduce the regression problem that will be used throughout the project. Assume we have a dataset $(x_i,y_i)$ for $i=1,\ldots,n$, where $x_i\in\mathbb{R}^d$ are inputs and $y_i\in\mathbb{R}$ are outputs. We would like to use these data to create a model for the relationship between the inputs and outputs.
 
-Let
-\[
-k:\mathbb{R}^d\times\mathbb{R}^d\to\mathbb{R}
-\]
-be a positive definite kernel function. For the training data we define the kernel matrix
-\[
-K\in\mathbb{R}^{n\times n},\quad K_{ij}=k(x_i,x_j).
-\]
-The entry $K_{ij}$ measures the similarity between the data points $x_i$ and $x_j$ according to the chosen kernel function. The matrix $K$ induced by $k$ is symmetric positive semidefinite.
+In ordinary linear regression, the model is searched for in a finite-dimensional linear function class. Kernel ridge regression instead searches over a reproducing kernel Hilbert space $\mathcal H$. 
 
-The kernel trick allows us to formulate this as
+\subsection{RKHS and KRR}
+
+A positive definite kernel $k$ defines a function space starting from finite linear combinations of kernel sections $k(\cdot,x_i)$. More precisely, one first considers functions of the form
+\[
+f(\cdot)=\sum_{i=1}^n \alpha_i k(\cdot,x_i).
+\]
+On this space, the inner product is defined as
+\[
+\|f\|_{\mathcal{H}}^2=\left\langle\sum_{i=1}^n\alpha_i k(\cdot,x_i),\sum_{j=1}^n\alpha_j k(\cdot,x_j)\right\rangle_{\mathcal{H}},
+\]
+which can be simplied to
+\[
+\langle k(\cdot,x_i),k(\cdot,x_j)\rangle_{\mathcal H}=k(x_i,x_j).
+\]
+The reproducing kernel Hilbert space $\mathcal H$ is then obtained by completing this space. With this inner product, functions in $\mathcal H$ satisfy the reproducing property
+\[
+f(x)=\langle f,k(\cdot,x)\rangle_{\mathcal H}.
+\]
+This means that evaluating $f$ at a point can be written as an inner product with the kernel section centered at that point \citep{zhu2023rkhs}.
+
+The RKHS norm $\|f\|_{\mathcal{H}}$ gives a way to penalize the size of the function in this kernel-defined space. One reason this norm can be interpreted as controlling the variation of $f$ is the Cauchy-Schwarz inequality together with the reproducing property. For two inputs $x$ and $x'$,
+\[
+|f(x)-f(x')|
+=
+|\langle f,k(\cdot,x)-k(\cdot,x')\rangle_{\mathcal H}|
+\leq
+\|f\|_{\mathcal H}\|k(\cdot,x)-k(\cdot,x')\|_{\mathcal H}.
+\]
+Thus a smaller norm limits how much the function can vary relative to the distance induced by the kernel. This motivates the regularization term $\lambda\|f\|_{\mathcal H}^2$ in kernel ridge regression \citep{zhu2023rkhs}.
+
+Kernel ridge regression searches for a function $f\in\mathcal H$ that fits the training data while keeping the RKHS norm small. The optimization problem is
 \[
 \min_{f\in\mathcal{H}}\|f(X)-y\|_2^2+\lambda\|f\|_{\mathcal{H}}^2,
 \]
@@ -22,11 +46,21 @@ which is also
 \[
 \min_{f\in\mathcal{H}}\sum_{i=1}^n(f(x_i)-y_i)^2+\lambda\|f\|_{\mathcal{H}}^2.
 \]
-Here $\lambda>0$ is the regularization parameter. The first term measures the error on the training data while the second term penalizes functions with large RKHS norm. Here $\lambda$ controls the trade off between fitting the data and overfitting.
+Here $\lambda>0$ is the regularization parameter. The first term measures the error on the training data, while the second term penalizes functions with large RKHS norm. In other words, $\lambda$ controls the trade off between fitting the data and overfitting.
 
-\section{Representer form}
+Now let
+\[
+k:\mathbb{R}^d\times\mathbb{R}^d\to\mathbb{R}
+\]
+be a positive definite kernel function. For the training data we define the kernel matrix
+\[
+K\in\mathbb{R}^{n\times n},\qquad K_{ij}=k(x_i,x_j).
+\]
+The entry $K_{ij}$ measures the similarity between the data points $x_i$ and $x_j$ according to the chosen kernel function. The matrix $K$ induced by $k$ is symmetric positive semidefinite. The kernel trick enters when the function-space problem above is rewritten using only kernel evaluations, which leads to a finite-dimensional formulation involving this matrix $K$.
 
-By the representer theorem, the minimizer has the form
+\subsection{Representer form}
+
+The optimization problem above is written over the whole function space $\mathcal{H}$, so at first it is not clear how it can be solved computationally. The representer theorem gives the key reduction. For optimization problems in an RKHS where the loss function depends on the values $f(x_i)$ at the training points and the penalty is a monotone function of $\|f\|_{\mathcal{H}}^2$, the solution can be written as a finite linear combination of kernel functions centered at the training points \citep{zhu2023rkhs}. Such a minimizer has the form
 \[
 f(x)=\sum_{j=1}^n\alpha_j k(x,x_j),
 \]
@@ -34,7 +68,10 @@ for some coefficient vector
 \[
 \alpha=(\alpha_1,\ldots,\alpha_n)^T\in\mathbb{R}^n.
 \]
-For the training points we have
+
+The reason why this is useful is that we no longer need to search over all functions in $\mathcal{H}$. We only need to determine the $n$ coefficients $\alpha_1,\ldots,\alpha_n$. The representer theorem implies that any part of $f$ orthogonal to the span of $k(\cdot,x_1),\ldots,k(\cdot,x_n)$ does not change the values at the training points, but it can only increase the RKHS norm penalty. Hence the minimizer can be taken inside this finite-dimensional span \citep{zhu2023rkhs}.
+
+We now rewrite both terms in the KRR objective using $\alpha$ and $K$. For the training points we have
 \[
 f(x_i)=\sum_{j=1}^n\alpha_j k(x_i,x_j),
 \]
@@ -47,11 +84,7 @@ Therefore the data fitting term becomes
 \sum_{i=1}^n(f(x_i)-y_i)^2=\|K\alpha-y\|_2^2.
 \]
 
-The RKHS norm term can also be written using the kernel matrix. First, by the reproducing property,
-\[
-\langle k(\cdot,x_i),k(\cdot,x_j)\rangle_{\mathcal{H}}=k(x_i,x_j).
-\]
-Since
+The RKHS norm term can also be written using the kernel matrix. Since
 \[
 f=\sum_{i=1}^n\alpha_i k(\cdot,x_i),
 \]
@@ -63,7 +96,11 @@ Using bilinearity of the inner product,
 \[
 \|f\|_{\mathcal{H}}^2=\sum_{i=1}^n\sum_{j=1}^n\alpha_i\alpha_j\langle k(\cdot,x_i),k(\cdot,x_j)\rangle_{\mathcal{H}}.
 \]
-Using the reproducing property again,
+By the reproducing property,
+\[
+\langle k(\cdot,x_i),k(\cdot,x_j)\rangle_{\mathcal{H}}=k(x_i,x_j).
+\]
+We then have
 \[
 \|f\|_{\mathcal{H}}^2=\sum_{i=1}^n\sum_{j=1}^n\alpha_i\alpha_j k(x_i,x_j).
 \]
@@ -71,7 +108,8 @@ Since $K_{ij}=k(x_i,x_j)$ this becomes
 \[
 \|f\|_{\mathcal{H}}^2=\alpha^T K\alpha.
 \]
-Substituting this into the objective gives
+
+Substituting the data fitting term and the RKHS norm term into the objective gives the finite-dimensional problem
 \[
 \min_{\alpha\in\mathbb{R}^n}\|K\alpha-y\|_2^2+\lambda\alpha^T K\alpha.
 \]
@@ -95,6 +133,7 @@ Therefore the coefficient vector is
 \[
 \alpha=(K+\lambda I)^{-1}y.
 \]
+
 The prediction for a new point $x$ is then
 \[
 \hat f(x)=\sum_{j=1}^n\alpha_j k(x,x_j).
@@ -110,9 +149,9 @@ then the test predictions are
 
 The regularization term is important numerically. Since $K$ can have very small eigenvalues or even zero eigenvalues, adding $\lambda I$ shifts all eigenvalues by $\lambda$ so $K+\lambda I$ is positive definite. This makes the system uniquely solvable and improves the conditioning of the problem.
 
-For large datasets, the main computational difficulty is that $K$ is an $n\times n$ matrix. Forming the full kernel matrix requires $O(n^2)$ kernel evaluations and storing it requires $O(n^2)$ memory. Solving the system directly, for example by Cholesky decomposition, costs $O(n^3)$ operations. For small $n$ this is fine but for large datasets this quickly becomes infeasible. Therefore in this project we investigate the Nystr\"om approximation of the kernel matrix: instead of forming all of $K$, we only form $l\ll n$ sampled columns and the corresponding $l\times l$ submatrix, and then make a low rank approximation $\tilde K\approx K$.
+For large datasets, the main computational difficulty is that $K$ is an $n\times n$ matrix. Forming the full kernel matrix requires $O(n^2)$ kernel evaluations and storing it requires $O(n^2)$ memory. Solving the system directly, for example by Cholesky decomposition, costs $O(n^3)$ operations. For small $n$ this is fine but for large datasets this quickly becomes infeasible.
 
-\section{Kernel choices}
+\subsection{Kernel choices}
 
 In the experiments we start with three common kernels. The linear kernel is
 \[
@@ -126,13 +165,15 @@ The Gaussian radial basis function kernel (rbf) is
 \[
 k(x,z)=\exp(-\gamma\|x-z\|_2^2).
 \]
-The parameter $\gamma$ controls how local the Gaussian kernel is. Larger $\gamma$ makes points only strongly similar to very nearby points while smaller $\gamma$ makes the similarities decay more slowly.
+The parameter $\gamma$ controls how local the Gaussian kernel is \citep{zhu2023rkhs,sklearn}. Larger $\gamma$ makes points only strongly similar to very nearby points while smaller $\gamma$ makes the similarities decay more slowly.
+
+These choices give a range of model flexibility. The linear kernel is the simplest option and is used to capture linear structure in the data. In high-dimensional and sparse data, linear kernel has the advantage of avoiding overfitting. The polynomial kernel can capture nonlinear feature interactions unlike the linear kernel. The RBF kernel is widely used for more complex patterns and can represent both linear and nonlinear relationships between data points \citep{gfg}. Since this project is about KRR rather than SVM, the above statements are only used as motivation for comparing the kernels, not as a rule to determine the best kernel.
 
 \section{Singular values and low-rank structure}
 
-A kernel matrix is useful for Nystr\"om approximation when its singular values decay. If many singular values are very small then much of the matrix can be approximated using a smaller rank. This is why in this section we look at singular values of $K$ for real data. The point is to check whether a low-rank approximation is reasonable for real world data.
+Given a large matrix, if many singular values are very small then much of the matrix can be approximated using a smaller rank. This is why in this section we look at singular values of $K$ for real data. The point is to check whether a low-rank approximation is reasonable for real world data.
 
-For this real data experiment we use the Superconductivity dataset from the UCI Machine Learning Repository. This is a regression dataset with $21263$ samples and $81$ numerical input features, and the output is the critical temperature. This fits the KRR setting since the target variable is continuous.
+For this real data experiment we use the Superconductivity dataset from the UCI Machine Learning Repository \citep{superconductivty_data_464}. This is a regression dataset with $n=21263$ samples and $d=81$ numerical input features, and the output is the critical temperature. This fits the KRR setting since the target variable is continuous.
 
 This dataset is also large enough to show the computational problem. If the full dataset is used, the kernel matrix has size $n\times n$ where $n=21,263$, this means there are $n^2 \approx 10^8$ entries in $K$ which corresponds to about 3.6 GB in memory, not to mention the construction computational cost. 
 
@@ -144,7 +185,7 @@ For the singular value plots, the singular values are normalised by the largest 
 \[
 \frac{\sigma_i(K)}{\sigma_1(K)}.
 \]
-This makes the three kernels easier to compare since all three curves start at $1$. The plots are also stopped once the singular values reach around $10^{-16}$, since after that the remaining tail is python or machine precision.
+This makes the three kernels easier to compare since all three curves start at $1$. The plots are also stopped once the singular values reach around $10^{-16}$, since after that the remaining tail is machine precision.
 
 \begin{figure}[h]
 \centering
@@ -155,29 +196,35 @@ This makes the three kernels easier to compare since all three curves start at $
 
 Figure \ref{tsv} compares the three kernels used in this project. Figure \ref{tsv}(a) shows the linear kernel. Since $K=XX^T$ for a linear kernel and the data have $81$ features, the rank is at most $81$, so the singular values drop to zero after that point. Figure \ref{tsv}(b) shows the polynomial kernel. This kernel is still based on inner products, but the square introduces nonlinear factors, so its spectrum does not have the same clean cut-off as the linear kernel. Figure \ref{tsv}(c) shows the RBF kernel. Here the decay depends more on the geometry of the data and the value of $\gamma$, so this is the most interesting case out of all three kernels. % Change second kernel maybe in the future.
 
-\section{Runtime and Accuracy experiments}
+\section{Runtime and accuracy experiments}
 
-We now check the computational cost in this section. Constructing a full kernel matrix means evaluating pairwise similarities between observations so the expected cost is quadratic in $n$. Solving the full KRR has cubic asymptotic cost if we use Cholesky or some other direct solver. However in the tested range the construction of $K$ can still take longer than the solve. This does not contradict the asymptotic costs. It just means the $O(n^2)$ construction curve can start much higher since every kernel entry has to be evaluated and stored while the solve is done by highly optimized linear algebra methods. In practice construction is almost always more expensive than the solve.
+We now check the computational cost in this section. Constructing a full kernel matrix means evaluating pairwise similarities between observations so the expected cost is quadratic in $n$. Solving the full KRR has cubic asymptotic cost if we use Cholesky or some other direct solver. However in the tested range the construction of $K$ can still take longer than the solve. This does not contradict the asymptotic costs. It just means the $O(n^2)$ construction curve can start much higher since every kernel entry has to be evaluated and stored while the solve is done by highly optimized linear algebra methods. In practice the construction is almost always more expensive than the solve.
 
 \begin{figure}[h]
 \centering
-\IfFileExists{Results/kernel_construction_time.pdf}{\includegraphics[width=0.72\textwidth]{Results/kernel_construction_time.pdf}}{\fbox{Run the singular value experiment to create this figure}}
+\begin{minipage}{0.49\textwidth}
+\centering
+\IfFileExists{Results/kernel_construction_time.pdf}{\includegraphics[width=1\textwidth]{Results/kernel_construction_time.pdf}}{\fbox{Run the singular value experiment to create this figure}}
 \caption{Time to construct the full kernel matrix for different values of $n$.}
 \label{kst}
+\end{minipage}
+\hspace{0.005\textwidth}
+\begin{minipage}{0.49\textwidth}
+\centering
+\IfFileExists{Results/construct_vs_solve_time.pdf}{\includegraphics[width=1\textwidth]{Results/construct_vs_solve_time.pdf}}{\fbox{Run the singular value experiment to create this figure}}
+\caption{Time to construct $K$ vs time to solve the full KRR system.}
+\label{cvs}
+\end{minipage}
 \end{figure}
 
 Figure \ref{kst} shows the construction time for the linear, polynomial and RBF kernels. The general behaviour follows the expected quadratic growth, but the constants are not the same. RBF kernel is slower since it is a more complex function than the other two.
 
-\begin{figure}[h]
-\centering
-\IfFileExists{Results/construct_vs_solve_time.pdf}{\includegraphics[width=0.72\textwidth]{Results/construct_vs_solve_time.pdf}}{\fbox{Run the singular value experiment to create this figure}}
-\caption{Comparison of the time to construct $K$ and the time to solve the full KRR system.}
-\label{cvs}
-\end{figure}
+Figure \ref{cvs} compares the time to construct the RBF kernel matrix with the time to solve $(K+\lambda I)\alpha=y$. In the code, we measure the solve time by forming $K+\lambda I$, then applying a Cholesky factorization and two triangular solves. The construction time is larger for the increasing values of $n$ which agrees with the theoretical expectation we have discussed above. This is one of the main reasons why column sampling is important: if only $l$ columns are sampled, then we can build $K_{:,I}$ and $K_{I,I}$ instead of all of $K$ which we will see in Chapter 3.
 
-Figure \ref{cvs} compares the time to construct the RBF kernel matrix with the time to solve $(K+\lambda I)\alpha=y$. The construction time is larger for the increasing values of $n$ which agrees with the theoretical expectation we have discussed above. This is one of the main reasons why column sampling is important: if only $l$ columns are sampled, then we can build $K_{:,I}$ and $K_{I,I}$ instead of all of $K$ which we will see in Chapter 3.
+We now look at the behaviour of the full KRR solution as the regularization parameter $\lambda$ changes. This is important because $\lambda$ appears directly in the system
+$(K+\lambda I)\alpha=y,$ so changing $\lambda$ changes both the model and the conditioning of the linear system. Later, when $K$ is replaced by an approximation $\tilde K$ in Nystr\"om, the same parameter still appears in the approximation system. Therefore it is useful to first understand the effect of $\lambda$ in the full KRR system.
 
-For the regression part, we fix a train/test split and first vary the regularization parameter $\lambda$. The metric is MSE (mean squared error).
+For this experiment, we use a fixed train/test split and measure the test error using MSE. We used MSE since it is a natural metric for the regression error and it gives a simple baseline that later can be compared with the Nystr\"om approximations.
 
 \begin{figure}[h]
 \centering
@@ -186,22 +233,26 @@ For the regression part, we fix a train/test split and first vary the regulariza
 \label{mvl}
 \end{figure}
 
-Figure \ref{mvl} shows we also study the choice of $\lambda$. Both very small or very large $\lambda$ give less stable fits, this is as expected since small lambda underregularizes which causes overfitting, and large lambda overregularizes which causes underfitting. The best value in this small experiment is in the middle of the tested range at roughly $\lambda = 0.1$.
+Figure \ref{mvl} shows that the test MSE depends strongly on $\lambda$. For very small values, especially $\lambda=10^{-5}$ and $\lambda=10^{-4}$, the test error is high. In this range the regularization term is too weak, so the solution can fit the training data too closely and generalize poorly. As $\lambda$ increases, the test MSE drops sharply and reaches its lowest value around $\lambda=10^{-1}$. After this point the error rises again, and for very large values such as $\lambda=10^2$ and $\lambda=10^3$, the penalty term is too strong and the fitted function becomes too restricted. Thus the plot shows the trade-off controlled by $\lambda$: both very small or very large $\lambda$ give less stable fits, small lambda underregularizes which causes overfitting and large lambda overregularizes which causes underfitting. The best value in this small experiment is in the middle of the tested range at roughly $\lambda = 0.1$.
 
 Finally, we fix the test set and use increasingly larger subsets of the training set. This checks both the prediction error and the runtime as the number of training observations grows.
 
+
 \begin{figure}[h]
+\centering
+\begin{minipage}{0.49\textwidth}
 \centering
 \IfFileExists{Results/mse_vs_train_size.pdf}{\includegraphics[width=0.72\textwidth]{Results/mse_vs_train_size.pdf}}{\fbox{Run the singular value experiment to create this figure}}
 \caption{Test MSE as the number of training observations increases.}
 \label{mvt}
-\end{figure}
-
-\begin{figure}[h]
+\end{minipage}
+\hspace{0.005\textwidth}
+\begin{minipage}{0.49\textwidth}
 \centering
 \IfFileExists{Results/runtime_vs_train_size.pdf}{\includegraphics[width=0.72\textwidth]{Results/runtime_vs_train_size.pdf}}{\fbox{Run the singular value experiment to create this figure}}
 \caption{Runtime as the number of training observations increases.}
 \label{tvt}
+\end{minipage}
 \end{figure}
 
 Figures \ref{mvt} and \ref{tvt} show the basic trade off. More training observations can improve the test error but the runtime increases at the same time. This is the practical situation where Nystr\"om becomes very useful: ideally we want to keep majority of the predictive information while avoiding the computational cost of dealing with the full kernel matrix.

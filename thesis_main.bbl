@@ -1,0 +1,58 @@
+\begin{thebibliography}{}
+
+\bibitem[Alaoui and Mahoney, 2015]{alaoui2015fast}
+Alaoui, A. and Mahoney, M.~W. (2015).
+\newblock Fast randomized kernel ridge regression with statistical guarantees.
+\newblock {\em Advances in neural information processing systems}, 28.
+
+\bibitem[Calandriello et~al., 2017]{calandriello2017distributed}
+Calandriello, D., Lazaric, A., and Valko, M. (2017).
+\newblock Distributed adaptive sampling for kernel matrix approximation.
+\newblock In {\em Artificial Intelligence and Statistics}, pages 1421--1429.
+  PMLR.
+
+\bibitem[Drineas et~al., 2005]{drineas2005nystrom}
+Drineas, P., Mahoney, M.~W., and Cristianini, N. (2005).
+\newblock On the nystr{\"o}m method for approximating a gram matrix for
+  improved kernel-based learning.
+\newblock {\em journal of machine learning research}, 6(12).
+
+\bibitem[GeeksforGeeks, 2025]{gfg}
+GeeksforGeeks (2025).
+\newblock How to choose the best kernel function for svms.
+\newblock GeeksforGeeks.
+
+\bibitem[Gittens and Mahoney, 2013]{gittens2013revisiting}
+Gittens, A. and Mahoney, M. (2013).
+\newblock Revisiting the nystrom method for improved large-scale machine
+  learning.
+\newblock In {\em International Conference on Machine Learning}, pages
+  567--575. PMLR.
+
+\bibitem[Hamidieh, 2018]{superconductivty_data_464}
+Hamidieh, K. (2018).
+\newblock {Superconductivty Data}.
+\newblock UCI Machine Learning Repository.
+\newblock {DOI}: https://doi.org/10.24432/C53P47.
+
+\bibitem[Martinsson and Tropp, 2020]{martinsson2020randomized}
+Martinsson, P.-G. and Tropp, J.~A. (2020).
+\newblock Randomized numerical linear algebra: Foundations and algorithms.
+\newblock {\em Acta Numerica}, 29:403--572.
+
+\bibitem[Musco and Musco, 2017]{musco2017recursive}
+Musco, C. and Musco, C. (2017).
+\newblock Recursive sampling for the nystrom method.
+\newblock {\em Advances in neural information processing systems}, 30.
+
+\bibitem[scikit-learn developers, 2026]{sklearn}
+scikit-learn developers (2026).
+\newblock skylearn.metrics.
+\newblock scikit-learn API.
+
+\bibitem[Zhu, 2023]{zhu2023rkhs}
+Zhu, R. (2023).
+\newblock Reproducing kernel hilbert space.
+\newblock Chapter 15 of \emph{Statistical Machine Learning with R}.
+
+\end{thebibliography}
