@@ -21,6 +21,9 @@
 \usepackage{natbib}
 \usepackage[colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue]{hyperref}
 \newtheorem{theorem}{Theorem}[chapter]
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[chapter]
+\theoremstyle{plain}
 \titleformat{\chapter}[hang]
 {\normalfont\LARGE\bfseries}
 {\thechapter}
@@ -83,7 +86,7 @@ Second supervisor: Prof. J.G. Peypouquet}}
 \clearpage
 
 \chapter*{Abstract}
-Kernel ridge regression leads to a linear system involving the full kernel matrix $K$. This matrix has size $n \times n$, so forming and storing it becomes expensive when the number of data points is large. This project studies randomized Nystr\"om approximations, where only $l \ll n$ columns of $K$ are used to build a low-rank approximation. The aim is to compare how the choice of sampled columns and the number of sampled columns affect accuracy, runtime, memory use, conditioning, and solver behaviour. \cite{gittens2013revisiting}
+Kernel ridge regression leads to a linear system involving the full kernel matrix $K$. This matrix has size $n \times n$, so forming and storing it becomes expensive when the number of data points is large. This project studies randomized Nystr\"om approximations, where only $l \ll n$ columns of $K$ are used to build a low-rank approximation. The aim is to compare how the choice of sampled columns and the number of sampled columns affect accuracy, runtime, memory use, conditioning, and solver behaviour. \citep{gittens2013revisiting}
 
 \clearpage
 

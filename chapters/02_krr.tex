@@ -6,11 +6,44 @@ In this chapter we introduce the kernel ridge regression problem that lays the f
 
 In this section we introduce the regression problem that will be used throughout the project. Assume we have a dataset $(x_i,y_i)$ for $i=1,\ldots,n$, where $x_i\in\mathbb{R}^d$ are inputs and $y_i\in\mathbb{R}$ are outputs. We would like to use these data to create a model for the relationship between the inputs and outputs.
 
-In ordinary linear regression, the model is searched for in a finite-dimensional linear function class. Kernel ridge regression instead searches over a reproducing kernel Hilbert space $\mathcal H$. 
+In ordinary linear regression, the model is searched for in a finite-dimensional linear function class. Kernel ridge regression instead searches over a reproducing kernel Hilbert space $\mathcal H$. Kernel ridge regression searches for a function $f\in\mathcal H$ that fits the training data while keeping the RKHS norm small. The optimization problem is
+\[
+\min_{f\in\mathcal{H}}\|f(X)-y\|_2^2+\lambda\|f\|_{\mathcal{H}}^2,
+\]
+which is also
+\[
+\min_{f\in\mathcal{H}}\sum_{i=1}^n(f(x_i)-y_i)^2+\lambda\|f\|_{\mathcal{H}}^2.
+\]
+Here $\lambda>0$ is the regularization parameter. The first term measures the error on the training data, while the second term penalizes functions with large RKHS norm. In other words, $\lambda$ controls the trade off between fitting the data and overfitting.
 
 \subsection{RKHS and KRR}
 
-A positive definite kernel $k$ defines a function space starting from finite linear combinations of kernel sections $k(\cdot,x_i)$. More precisely, one first considers functions of the form
+\begin{definition}[Positive definite kernel]
+Let $\mathcal X\subseteq\mathbb{R}^d$ be the input space. A symmetric function
+\[
+k:\mathcal X\times\mathcal X\to\mathbb{R}
+\]
+is called a positive definite kernel if, for any points $x_1,\ldots,x_n\in\mathcal X$ and any coefficients $\alpha_1,\ldots,\alpha_n\in\mathbb{R}$,
+\[
+\sum_{i=1}^n\sum_{j=1}^n\alpha_i\alpha_j k(x_i,x_j)\geq0.
+\]
+\end{definition}
+
+The value $k(x_i,x_j)$ measures the similarity between two inputs $x_i$ and $x_j$ according to the chosen kernel. If one input is fixed then $k(\cdot,x_i)$ is a function of the remaining argument. This is called a kernel section centered at $x_i$.
+
+\begin{definition}[Reproducing kernel Hilbert space]
+Given a positive definite kernel $k$, the associated reproducing kernel Hilbert space $\mathcal H$ is the Hilbert space obtained by completing the span of the kernel sections:
+\[
+\mathcal H=\overline{\operatorname{span}}{k(\cdot,x):x\in\mathcal X}.
+\]
+It has the reproducing property
+\[
+f(x)=\langle f,k(\cdot,x)\rangle_{\mathcal H}
+\]
+for every $f\in\mathcal H$ and every $x\in\mathcal X$.
+\end{definition}
+
+We now consider functions of the form
 \[
 f(\cdot)=\sum_{i=1}^n \alpha_i k(\cdot,x_i).
 \]
@@ -37,16 +70,6 @@ The RKHS norm $\|f\|_{\mathcal{H}}$ gives a way to penalize the size of the func
 \|f\|_{\mathcal H}\|k(\cdot,x)-k(\cdot,x')\|_{\mathcal H}.
 \]
 Thus a smaller norm limits how much the function can vary relative to the distance induced by the kernel. This motivates the regularization term $\lambda\|f\|_{\mathcal H}^2$ in kernel ridge regression \citep{zhu2023rkhs}.
-
-Kernel ridge regression searches for a function $f\in\mathcal H$ that fits the training data while keeping the RKHS norm small. The optimization problem is
-\[
-\min_{f\in\mathcal{H}}\|f(X)-y\|_2^2+\lambda\|f\|_{\mathcal{H}}^2,
-\]
-which is also
-\[
-\min_{f\in\mathcal{H}}\sum_{i=1}^n(f(x_i)-y_i)^2+\lambda\|f\|_{\mathcal{H}}^2.
-\]
-Here $\lambda>0$ is the regularization parameter. The first term measures the error on the training data, while the second term penalizes functions with large RKHS norm. In other words, $\lambda$ controls the trade off between fitting the data and overfitting.
 
 Now let
 \[
