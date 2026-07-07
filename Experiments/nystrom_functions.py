@@ -66,6 +66,25 @@ def approximate_leverage(K, ini_l, extra_l, rng):
     sample_ind = np.concatenate([ini_ind, extra_ind])
     return sample_ind, scores, ini_ind
 
+
+def approximate_leverage_kernel(X, kernel, ini_l, extra_l, rng):
+    n = X.shape[0]
+    ini_l = min(ini_l, n)
+    ini_ind = uniform_sampling(n, ini_l, rng)
+    K1 = kernel(X, X[ini_ind])
+    U, sigma, VT = np.linalg.svd(K1, full_matrices=False)
+    scores = np.zeros(n)
+
+    for i in range(n):
+        row = U[i, :]
+        scores[i] = np.sum(row ** 2)
+
+    scores[ini_ind] = 0
+    extra_ind = sample_from_scores(scores, extra_l, rng)
+    sample_ind = np.concatenate([ini_ind, extra_ind])
+    return sample_ind, scores, ini_ind
+
+
 def recursive_nystrom(X, kernel, lam, delta, rng, base_size=None):
     m = X.shape[0]
 
@@ -127,3 +146,50 @@ def recursive_nystrom(X, kernel, lam, delta, rng, base_size=None):
     weight = 1 / np.sqrt(p[sample_ind])
 
     return sample_ind, weight
+
+def column_nystrom_alg16(X, kernel, sample_ind, Explicit_Ktilde=False):
+    n = X.shape[0]
+    sample_ind = np.asarray(sample_ind, dtype=int)
+    l = len(sample_ind)
+    X_sample = X[sample_ind]
+    C = kernel(X, X_sample)
+    W = C[sample_ind, :]
+    nu = np.sqrt(n) * np.spacing(np.linalg.norm(C, 2))
+    C_nu = C.copy()
+    for j in range(l):
+        i = sample_ind[j]
+        C_nu[i, j] = C_nu[i, j] + nu
+    W_nu = C_nu[sample_ind, :]
+    R = cholesky(W_nu, lower=False)
+    B = solve_triangular(R.T, C_nu.T, lower=True).T
+    U, sigma, V = svd(B, full_matrices=False)
+    eigval = np.maximum(0.0, sigma**2 - nu)
+
+    if Explicit_Ktilde:
+        K_tilde = U @ np.diag(eigval) @ U.T
+        return U, eigval, C, W, K_tilde
+
+    return U, eigval, C, W
+
+def solver(X_train, kernel, sample_ind, y_train, krr_lam, X_test=None, return_factors=False):
+    y_train = np.asarray(y_train, dtype=float)
+    sample_ind = np.asarray(sample_ind, dtype=int)
+    U, eigval, C, W = column_nystrom_alg16(X_train, kernel, sample_ind, Explicit_Ktilde=False)
+    # alpha = (1/lambda)y - U diag(eig_i / (lam (eig_i + lam))) U^T y, swapped to vector multiplication for cost efficiency
+    alpha = y_train / krr_lam - U @ ((eigval / (krr_lam * (eigval + krr_lam))) * (U.T @ y_train))
+
+    if X_test is None:
+        if return_factors:
+            return alpha, U, eigval, C, W
+        return alpha
+
+    # this is test against sampled indices kernels not full K_test
+    X_sample = X_train[sample_ind]
+    C_test = kernel(X_test, X_sample)
+    # direct pseudo-inverse
+    y_hat = C_test @ np.linalg.pinv(W) @ (C.T @ alpha)
+
+    if return_factors:
+        return alpha, y_hat, U, eigval, C, W
+
+    return alpha, y_hat

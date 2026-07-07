@@ -17,11 +17,6 @@ Drineas, P., Mahoney, M.~W., and Cristianini, N. (2005).
   improved kernel-based learning.
 \newblock {\em journal of machine learning research}, 6(12).
 
-\bibitem[GeeksforGeeks, 2025]{gfg}
-GeeksforGeeks (2025).
-\newblock How to choose the best kernel function for svms.
-\newblock GeeksforGeeks.
-
 \bibitem[Gittens and Mahoney, 2013]{gittens2013revisiting}
 Gittens, A. and Mahoney, M. (2013).
 \newblock Revisiting the nystrom method for improved large-scale machine
