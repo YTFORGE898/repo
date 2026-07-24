@@ -1,0 +1,4 @@
+dataset,submatrix_size,effective_dimension_at_0.01,rank_for_99.9_percent_frobenius_energy
+CASP,2000,291.6434742350503,14
+Superconductivity,2000,844.5604762841559,44
+CT Slice Localization,2000,1841.6688036904693,311

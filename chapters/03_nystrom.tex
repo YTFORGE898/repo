@@ -1,30 +1,29 @@
 \chapter{Nystr\"om Approximation}
 
-The Nystr\"om approximation is a way to approximate a large positive semidefinite matrix by using only a smaller part of it. In this project the positive semidefinite matrix is the kernel matrix $K$, but it is useful to first describe the construction for a general positive semidefinite matrix $A$. The aim is to build a low rank approximation $\tilde{A}$ without using all of $A$ in a full direct factorization.
+The approach originates from a numerical procedure introduced by Nystr\"om for solving integral equations \citep{nystrom1930practical}. In modern kernel approximation, it constructs a low rank approximation of a large positive semidefinite matrix by using only a smaller part of it \citep{williams2000using,drineas2005nystrom}. In this project the positive semidefinite matrix is the kernel matrix $K$, but it is useful to first describe the construction for a general positive semidefinite matrix $A$. The aim is to build a low rank approximation $\tilde{A}$ without using all of $A$ in a full direct factorization.
 
 \section{General Nystr\"om form}
 
-Following the general formulation in randomized numerical linear algebra, let
-\[
-A\in\mathbb{R}^{n\times n},\quad A\succeq0,
-\]
-and let $X\in\mathbb{R}^{n\times l}$ be a test matrix, the Nystr\"om approximation of $A$ with respect to $X$ is
-\[
+We now look at the general Nystr\"om form. Let $A\in\mathbb{R}^{n\times n}$ and denote $\succeq$ as the sign for positive semidefiniteness where $A\succeq0$ means $A$ is positive semidefinite. And let $X\in\mathbb R^{n\times l}$ be a test matrix. The columns of $X$ specify the directions through which the matrix $A$ is probed and the product $AX$ is the resulting sample matrix. The column space of $AX$ contains enough information to construct an accurate low rank approximation if these sampled directions capture the dominant subspace of $A$. 
+
+Following the general formulation in randomized numerical linear algebra, we let $A\in\mathbb{R}^{n\times n}$ where $A\succeq0$, and let $X\in\mathbb{R}^{n\times l}$ be a test matrix, the Nystr\"om approximation of $A$ with respect to $X$ is
+\begin{equation}
 A\langle X\rangle=(AX)(X^TAX)^\dagger(AX)^T.
-\]
-Here $A\succeq0$ denotes that $A$ is positive semidefinite, $(X^TAX)^\dagger$ denotes the Moore--Penrose pseudoinverse. The pseudoinverse generalizes the inverse to matrices that may be singular and it agrees with the usual inverse when $X^TAX$ is invertible. The test matrix $X$ is the thing we use to probe or sketch $A$ by forming $AX$ \citep{martinsson2020randomized}. Later on when we sample columns this matrix becomes a sampling matrix that selects columns of the kernel matrix. The matrix $AX$ contains the information we collect from $A$. The smaller matrix
+\label{eq:1}
+\end{equation}
+Here $(X^TAX)^\dagger$ denotes the Moore--Penrose pseudoinverse. The pseudoinverse generalizes the inverse to matrices that may be singular and it agrees with the usual inverse when $X^TAX$ is invertible \citep{penrose1955generalized}. The test matrix $X$ is the thing we use to probe or sketch $A$ by forming $AX$ \citep{martinsson2020randomized}. Later on when we sample columns this matrix becomes a sampling matrix that selects columns of the kernel matrix. The matrix $AX$ contains the information we collect from $A$. The smaller matrix
 \[
 X^TAX\in\mathbb{R}^{l\times l}
 \]
 describes how the sampled directions interact with each other.
 
-This formula shows why the approximation has rank at most $l$ since the formula is a product involving the $n\times l$ matrix $AX$, so
+Equation \eqref{eq:1} shows why the approximation has rank at most $l$ since it is a product involving the $n\times l$ matrix $AX$, so
 \[
 \operatorname{rank}(A\langle X\rangle)\leq l.
 \]
 Therefore, when $l\ll n$, the approximation is much cheaper to store and compute with than the full matrix $A$.
 
-There is also a useful geometric representation of this formula. Since $A$ is positive semidefinite, it has a positive semidefinite square root $A^{1/2}$ and $A=A^{1/2}A^{1/2}$. Therefore
+There is also a useful geometric representation of this formula \citep[Section~14]{martinsson2020randomized}. Since $A$ is positive semidefinite, it has a positive semidefinite square root $A^{1/2}$ and $A=A^{1/2}A^{1/2}$. Therefore
 \[
 AX=A^{1/2}(A^{1/2}X)
 \]
@@ -53,7 +52,7 @@ Then the expression inside the bracket becomes
 \[
 Y(Y^TY)^\dagger Y^T.
 \]
-We see that this is the standard formula for the orthogonal projector onto the column space of $Y$. Therefore, if we let $P_Y$ denote this projector, then 
+We see that this is the standard formula for the orthogonal projector onto the column space of $Y$ \citep{trefethen1997numerical}. Therefore, if we let $P_Y$ denote this projector, then 
 \[
 A\langle X\rangle=A^{1/2}P_Y A^{1/2}.
 \]
@@ -62,7 +61,7 @@ Since $Y=A^{1/2}X$, we can also just write this as $P_{A^{1/2}X}$. Hence
 A\langle X\rangle=A^{1/2}P_{A^{1/2}X}A^{1/2}.
 \]
 
-This form explains the error formula. Since $A=A^{1/2}IA^{1/2}$, we have
+This projector representation can now be used to derive an expression for the Nystr\"om approximation error $A-A\langle X\rangle$. Since $A=A^{1/2}IA^{1/2}$, we have
 \[
 A-A\langle X\rangle
 =
@@ -71,20 +70,18 @@ A^{1/2}IA^{1/2}
 A^{1/2}P_{A^{1/2}X}A^{1/2}.
 \]
 Factoring out $A^{1/2}$ on both sides gives
-\[
+\begin{equation}
 A-A\langle X\rangle
 =
 A^{1/2}(I-P_{A^{1/2}X})A^{1/2}.
-\]
+\label{2}
+\end{equation}
 So the error is the part of $A$ that is not captured by the subspace spanned by the columns of $A^{1/2}X$.
+Since $P_{A^{1/2}X}$ is an orthogonal projector and therefore positive semidefinite, this representation also shows that $A\langle X\rangle \succeq 0$.
 
-This has error as
-\[
-A-A\langle X\rangle=A^{1/2}(I-P_{A^{1/2}X})A^{1/2}
-\]
-which is the Schur complement viewpoint used by Martinsson and Tropp \citep{martinsson2020randomized}. This means that the Nystr\"om approximation keeps the part of $A$ which is seen through the subspace generated by $X$. We now give a formal theorem of this.
+Equation \eqref{2} is the Schur complement viewpoint used by Martinsson and Tropp \citep{martinsson2020randomized}. This means that the Nystr\"om approximation keeps the part of $A$ which is seen through the subspace generated by $X$. We now give a formal theorem of this.
 
-\begin{theorem}
+\begin{theorem}[Nystr\"om error representation; \citealp{martinsson2020randomized}]
 Let $A\in\mathbb{R}^{n\times n}$ be positive semidefinite and let $X\in\mathbb{R}^{n\times l}$. Then
 \[
 A-A\langle X\rangle=A^{1/2}(I-P_{A^{1/2}X})A^{1/2}.
@@ -99,14 +96,7 @@ so
 \]
 \end{theorem}
 
-We have proved parts of this theorem above, to complete it we see that since $I-P_{A^{1/2}X}$ is an orthogonal projector, it is positive semidefinite. Thus
-\[
-A-A\langle X\rangle\succeq0.
-\]
-This also gives
-\[
-0\preceq A\langle X\rangle\preceq A.
-\]
+We have proved parts of this theorem above, to complete it we see that since $I-P_{A^{1/2}X}$ is an orthogonal projector, it is positive semidefinite. Thus $A-A\langle X\rangle$ is positive semidefinite, i.e. $A-A\langle X\rangle\succeq 0$. Rearranging that gives the last statement of the theorem where the notation $A\preceq B$ means that $B-A$ is positive semidefinite.
 
 Theorem 3.1 identifies the error matrix of the Nystr\"om approximation. The left hand side $A-A\langle X\rangle$ is exactly the part of $A$ that is not captured by the approximation. The right hand side shows that this error is determined by the complementary projector $I-P_{A^{1/2}X}$. Since $P_{A^{1/2}X}$ projects onto the column space of $A^{1/2}X$, the matrix $I-P_{A^{1/2}X}$ projects onto complementary part of that space in the whole space. Therefore the theorem says that the Nystr\"om error comes from the directions of $A$ that are missed by the subspace generated by $A^{1/2}X$ \citep{martinsson2020randomized}.
 
@@ -121,31 +111,30 @@ to
 \[
 (\tilde K+\lambda I)\tilde\alpha=y.
 \]
-Since $\tilde K\preceq K$, the approximation changes both the estimator and the conditioning of the linear system. In directions where $\tilde K$ approximates $K$ well, the solution should be close. In directions where $\tilde K$ loses a lot information, the $\lambda I$ regularization term dominates more. This is one reason why the number of sampled columns $l$, the sampling strategy and the regularization parameter $\lambda$ have to be studied together.
+Since $\tilde K\preceq K$, the approximation changes both the estimator and the conditioning of the linear system. In directions where $\tilde K$ approximates $K$ well, the solution should be close. In directions where $\tilde K$ loses a lot of information, the $\lambda I$ regularization term dominates more. This is one reason why the number of sampled columns $l$, the sampling strategy and the regularization parameter $\lambda$ have to be studied together.
 
 \section{Randomized Nystr\"om approximation}
 
-We now discuss more on the test matrix $X$ mentioned above that supposedly probes the important directions of $A$. The randomized Nystr\"om approximation draws a random matrix
-$\Omega\in\mathbb{R}^{n\times l}$ and form $Y=A\Omega.$
-Then the Nystr\"om approximation is
+We now discuss more on the test matrix $X$ mentioned above that is used to probe the important directions of $A$. The randomized Nystr\"om approximation draws a random matrix
+$X\in\mathbb{R}^{n\times l}$ and forms $Y=AX.$ Then the Nystr\"om approximation is
 \[
-\hat A=Y(\Omega^TY)^\dagger Y^T.
+\hat A=Y(X^TY)^\dagger Y^T.
 \]
-This is the randomized Nystr\"om approximation described by Martinsson and Tropp \citep{martinsson2020randomized}. The idea of a random test matrix was first introduced through the randomized rangefinder. In theory we can draw a random matrix $\Omega$ and form a sample matrix such as $Y=B\Omega$ for some matrix $B$, whose columns are used to capture an important subspace of the target matrix \citep[Section 11]{martinsson2020randomized}. A Gaussian test matrix is a standard theoretical choice where its entries are independent Gaussian random variables, so $B\Omega$ gives random linear combinations of the columns of $B$. This explains why randomization can be used to find a useful low-dimensional subspace. Nystr\"om approximation therefore uses a similar idea but in this case the target matrix is positive semidefinite \citep[Section 14]{martinsson2020randomized}.
+This is the randomized Nystr\"om approximation described by Martinsson and Tropp \citep{martinsson2020randomized}. The idea of a random test matrix was first introduced through the randomized rangefinder. In theory we can draw a random matrix $X$ and form a sample matrix such as $Y=BX$ for some matrix $B$, whose columns are used to capture an important subspace of the target matrix \citep{troppfinding,martinsson2020randomized}. A Gaussian test matrix is a standard theoretical choice where its entries are independent Gaussian random variables, so $BX$ gives random linear combinations of the columns of $B$. This explains why randomization can be used to find a useful low-dimensional subspace. Nystr\"om approximation therefore uses a similar idea but in this case the target matrix is positive semidefinite \citep[Section 14]{martinsson2020randomized}.
 
-However, for kernel matrices, a dense Gaussian test matrix is usually not practical. Kernel matrices are expensive because even forming their entries requires $\mathcal{O}(n^2)$ kernel evaluations. In the coming sections we will see that the Nystr\"om approximation is usually implemented by sampling columns of the kernel matrix. This is equivalent to using a column-selection matrix as the test matrix. Let $I=\{i_1,\ldots,i_l\}\subset\{1,\ldots,n\}$ be the selected column indices. Define the sampling matrix
+However, for kernel matrices, a dense Gaussian test matrix is usually not practical. Kernel matrices are expensive because even forming their entries requires $\mathcal{O}(n^2)$ kernel evaluations. In the coming sections we will see that the Nystr\"om approximation is usually implemented by sampling columns of the kernel matrix. This is equivalent to using a column-selection matrix as the test matrix. Let $I=\{i_1,\ldots,i_l\}\subset\{1,\ldots,n\}$ be the selected column indices and let $S=[e_{i_1}\ \cdots\ e_{i_l}]\in\mathbb R^{n\times l}$. Define the sampling matrix
 \[
 Y=KS=K_{:,I}.
 \]
-Therefore the Gaussian test matrix explains the general randomized sketching idea, while the column-selection matrix gives the practical Nystr\"om approximation used in the experiments.
+Therefore the Gaussian test matrix explains the general randomized sketching idea, while the column-selection matrix gives the practical Nystr\"om approximation used in the experiments \citep{williams2000using,kumar2012sampling,gittens2016revisiting}.
 
 \section{Nystr\"om approximation and the KRR system}
 
 We now discuss the practical implementation of the Nystr\"om approximation. Since $K$ is symmetric positive semidefinite, it has an eigendecomposition
 \[
-K=U\Lambda U^T.
-\]
-Splitting the eigenvectors into essential and less important directions gives
+K=U\Lambda U^T,
+\] where $U$ is an orthogonal matrix and all eigenvalues in $\Lambda$ are real. If we sort the eigenvalues from largest to smallest and let $U_1\in\mathbb{R}^{n\times l}$ contain the eigenvectors corresponding
+to the $l$ largest eigenvalues. The associated eigenvalues form $\Lambda_1\in\mathbb{R}^{l\times l}$. We then partition
 \[
 U=
 \begin{bmatrix}
@@ -162,9 +151,9 @@ Therefore
 \[
 K=U_1\Lambda_1U_1^T+U_2\Lambda_2U_2^T.
 \]
-If the eigenvalues in $\Lambda_2$ are small, then the second term contributes less to the matrix, and the ideal rank-$l$ approximation is $K\approx U_1\Lambda_1U_1^T$. This motivates the approximation idea: instead of using all directions of $K$, we would like to keep only the important directions. We have seen this idea in the section on the general Nystr\"om form, where the approximation error is determined by the directions that are missed by the subspace generated by $X$. In this case, the important directions are those corresponding to the eigenvectors in $U_1$.
+If the eigenvalues in $\Lambda_2$ are small, then the second term contributes less to the matrix. And since $\Lambda_1 \in \mathbb{R}^{l\times l}$, the ideal rank-$l$ approximation is $K\approx U_1\Lambda_1U_1^T$. This motivates the approximation idea: instead of using all directions of $K$, we would like to keep only the important directions. We have seen this idea in the section on the general Nystr\"om form, where the approximation error is determined by the directions that are missed by the subspace generated by $X$. In this case, the important directions are those corresponding to the eigenvectors in $U_1$ \citep{eckart1936approximation}.
 
-However, computing $U_1$ and $\Lambda_1$ directly would require spectral information from the full kernel matrix. This is not practical if the goal is to avoid computing with all of $K$. Thus we construct a low rank approximation from sampled columns with $\tilde K=CW^\dagger C^T.$ Here $C=K_{:,I}$ contains the sampled columns, and $W=K_{I,I}$ is the smaller intersection matrix. This is not the exact truncated eigendecomposition, but it is a column sampling way to approximate the important low rank part of $K$ as we we will see in the next section \citep{musco2017recursive}.
+However, computing $U_1$ and $\Lambda_1$ directly would require spectral information from the full kernel matrix. This is not practical if the goal is to avoid computing with all of $K$. Thus we construct a low rank approximation from sampled columns with $\tilde K=CW^\dagger C^T.$ Here $C=K_{:,I}$ contains the sampled columns, and $W=K_{I,I}$ is the smaller intersection matrix. This is not the exact truncated eigendecomposition, but it is a column sampling way to approximate the important low rank part of $K$ as we will see in the next section \citep{williams2000using,drineas2005nystrom,kumar2012sampling,gittens2016revisiting,musco2017recursive}.
 
 \section{Column sampling}
 
@@ -172,7 +161,7 @@ We now look at column sampling. Let
 \[
 I=\{i_1,\ldots,i_l\}\subset\{1,\ldots,n\}
 \]
-be the selected column indices. Define the sampling matrix
+be the selected column indices, this set of columns are also called $\emph{landmarks}.$ Define the sampling matrix
 \[
 S=\begin{bmatrix}e_{i_1}&e_{i_2}&\cdots&e_{i_l}\end{bmatrix}\in\mathbb{R}^{n\times l},
 \]
@@ -198,7 +187,7 @@ Equivalently,
 \]
 This is the form used in this project. Instead of forming or storing all of $K$, the approximation is built from the sampled columns $K_{:,I}$ and the smaller intersection matrix $K_{I,I}$. The notation $K_{:,I}$ means that we keep all rows of $K$, but only the columns whose indices are in $I$. In other words,
 \[
-K_{:,I}=
+C=K_{:,I}=
 \begin{bmatrix}
 K_{1,i_1} & K_{1,i_2} & \cdots & K_{1,i_l}\\
 K_{2,i_1} & K_{2,i_2} & \cdots & K_{2,i_l}\\
@@ -208,7 +197,7 @@ K_{n,i_1} & K_{n,i_2} & \cdots & K_{n,i_l}
 \]
 Similarly, $K_{I,I}$ means that both the rows and columns only contain that of the selected index set $I$:
 \[
-K_{I,I}=
+W=K_{I,I}=
 \begin{bmatrix}
 K_{i_1,i_1} & K_{i_1,i_2} & \cdots & K_{i_1,i_l}\\
 K_{i_2,i_1} & K_{i_2,i_2} & \cdots & K_{i_2,i_l}\\
@@ -234,105 +223,179 @@ The column-sampling formula above also gives a simple Nystr\"om algorithm. The s
 
 The approximate KRR system obtained from the Nystr\"om approximation is
 \[
-(CW^{-1}C^T+\lambda I)\tilde\alpha=y.
+(CW^\dagger C^T+\lambda I)\tilde\alpha=y.
 \]
-If we first form the full matrix $CW^{-1}C^T$, then we again have an $n\times n$ matrix. This is useful in small experiments, but it does not use the full advantage of the Nystr\"om representation. What we can do is to keep $C$ and $W$, then reduce the solve to a smaller system.
+If we first form the full matrix $CW^\dagger C^T$, then we again have an $n\times n$ matrix. This is useful in small experiments, but it does not use the full advantage of the Nystr\"om representation. What we can do is to keep $C$ and $W$, then reduce the solve to a smaller system.
 
-Assume that $W$ is invertible. Let
+First we introduce a small shift $\nu>0$. This shift is used for numerical
+stability \citep[Algorithm~16]{martinsson2020randomized}. Define the shifted column sampling matrix 
 \[
-q=W^{-1}C^T\tilde\alpha.
+C_\nu=C+\nu S.
 \]
-Then
+Since $C=KS$, this can also be written as
 \[
-CW^{-1}C^T\tilde\alpha=Cq.
+C_\nu=KS+\nu S=(K+\nu I)S.
 \]
-Therefore the approximate KRR system becomes
+Thus the shift corresponds to applying the column sampling to $K+\nu I$ instead of directly to $K$.
+
+The corresponding shifted intersection matrix is
 \[
-Cq+\lambda\tilde\alpha=y.
+S^TC_\nu=S^T(C+\nu S)=S^TKS+\nu S^TS.
 \]
-Solving this equation for $\tilde\alpha$ gives
+Since $S$ is a column selecting matrix, its columns are orthonormal coordinate vectors. So
+$S^TS=I_l$ and therefore
 \[
-\tilde\alpha=\frac{1}{\lambda}(y-Cq).
+S^TC_\nu=W+\nu I_l=W_\nu.
 \]
-Substituting this into the definition of $q$ gives
+The shift makes $W_\nu$ positive definite in exact arithmetic, so we can compute its
+Cholesky factorization
 \[
-q=W^{-1}C^T\left(\frac{1}{\lambda}(y-Cq)\right).
+W_\nu=LL^T,
 \]
-Multiplying by $\lambda W$ gives
+where $L\in\mathbb{R}^{l\times l}$ is a lower triangular matrix.
+
+Next, let
 \[
-\lambda Wq=C^Ty-C^TCq.
+B=C_\nu L^{-T}.
 \]
-Rearranging gives
+We have
 \[
-(C^TC+\lambda W)q=C^Ty.
+BB^T=C_\nu L^{-T}L^{-1}C_\nu^T=C_\nu (LL^T)^{-1}C_\nu^T=C_\nu W_\nu^{-1}C_\nu^T.
 \]
-This is only a $l\times l$ linear system. After solving for $q$, the approximate KRR coefficient vector is recovered by
+Thus $BB^T$ is the shifted Nystr\"om approximation, but stored through the thin factor
+$B\in\mathbb{R}^{n\times l}$ rather than as a full $n\times n$ matrix.
+
+Now we can compute a singular value decomposition of $B$ of the form $B=U\Sigma V^T$, where
 \[
-\tilde\alpha=\frac{1}{\lambda}(y-Cq).
+U\in\mathbb{R}^{n\times l},\qquad \Sigma\in\mathbb{R}^{l\times l}, \qquad V\in\mathbb{R}^{l\times l}.
+\] Then
+\[
+BB^T=U\Sigma V^TV\Sigma U^T=U\Sigma^2U^T.
+\]
+Therefore the singular values of $B$ give the eigenvalues of the shifted low rank
+approximation.
+
+The shift $\nu$ was introduced only for the Cholesky factorization, so it is removed from
+the eigenvalues after the SVD. If
+\[
+\Sigma^2=\operatorname{diag}(\sigma_1^2,\ldots,\sigma_l^2),
+\]
+Let
+\[
+\eta_j=\max(0,\sigma_j^2-\nu),
+\]
+and
+\[
+\Lambda=\operatorname{diag}(\eta_1,\ldots,\eta_l).
+\] With a slight abuse of notation, we reuse $U$ and $\Lambda$ for the factors of the Nystr\"om approximation instead of the eigendecomposition of $K$ from Section 3.3.
+The final factorized Nystr\"om approximation is then
+\[
+\tilde K=U\Lambda U^T.
+\]
+This is the form used for the KRR solve. The large matrix $\tilde K$ is not explicitly
+formed, it is stored by the matrix $U$ with orthonormal columns and the diagonal matrix $\Lambda$.
+
+Using the factorized representation in $(\tilde K+\lambda I)\tilde\alpha=y$, we have
+\[
+(U\Lambda U^T+\lambda I)\tilde\alpha=y.
+\]
+We now solve this system using the orthogonality of $U$. Complete the columns of $U$ to an
+orthonormal basis:
+\[
+Q=
+\begin{bmatrix}
+U & U_\perp
+\end{bmatrix},
+\]
+where
+\[
+U^TU=I, \qquad U_\perp^TU_\perp=I, \qquad U^TU_\perp=0.
+\]
+Therefore
+\[
+UU^T+U_\perp U_\perp^T=I.
+\]
+Since $\tilde K=U\Lambda U^T$, we can write
+\[
+\tilde K=
+\begin{bmatrix}
+U & U_\perp
+\end{bmatrix}
+\begin{bmatrix}
+\Lambda & 0 \\
+0 & 0
+\end{bmatrix}
+\begin{bmatrix}
+U^T \\
+U_\perp^T
+\end{bmatrix}.
+\]
+Adding the regularization term gives
+\[
+\tilde K+\lambda I=
+\begin{bmatrix}
+U & U_\perp
+\end{bmatrix}
+\begin{bmatrix}
+\Lambda+\lambda I & 0 \\
+0 & \lambda I
+\end{bmatrix}
+\begin{bmatrix}
+U^T \\
+U_\perp^T
+\end{bmatrix}.
+\]
+Then we have
+\[
+(\tilde K+\lambda I)^{-1}
+=
+\begin{bmatrix}
+U & U_\perp
+\end{bmatrix}
+\begin{bmatrix}
+(\Lambda+\lambda I)^{-1} & 0 \\
+0 & \frac{1}{\lambda}I
+\end{bmatrix}
+\begin{bmatrix}
+U^T \\
+U_\perp^T
+\end{bmatrix}.
+\]
+Multiplying this by $y$ gives
+\[
+\tilde\alpha=U(\Lambda+\lambda I)^{-1}U^Ty+\frac{1}{\lambda}U_\perp U_\perp^Ty.
+\]
+Using
+\[
+U_\perp U_\perp^T=I-UU^T,
+\]
+we get
+\[
+\tilde\alpha=U(\Lambda+\lambda I)^{-1}U^Ty+\frac{1}{\lambda}(I-UU^T)y.
 \]
 
-So the large system
+In implementation, neither $U_\perp$ nor $I-UU^T$ needs to be formed. Since
 \[
-(CW^{-1}C^T+\lambda I)\tilde\alpha=y
+\Lambda=\operatorname{diag}(\eta_1,\ldots,\eta_l),
 \]
-is replaced by the smaller system
+the solution is equivalently to
 \[
-(C^TC+\lambda W)q=C^Ty.
-\]
-The full $n\times n$ matrix $CW^{-1}C^T$ is never formed explicitly. The main matrices used in the solve are $C\in\mathbb{R}^{n\times l}$, $W\in\mathbb{R}^{l\times l}$ and $C^TC\in\mathbb{R}^{l\times l}$.
-
-The computational advantage is therefore as follows. Forming $C^TC$ costs $O(nl^2)$ and solving the smaller system costs $O(l^3)$. When $l\ll n$, this is much cheaper than solving a dense $n\times n$ system, which costs about $O(n^3)$.
-
-If $W$ is singular, the inverse $W^{-1}$ is replaced by the Moore--Penrose pseudoinverse $W^\dagger$. We factor $W^\dagger$ as $W^\dagger=BB^T$ and write
-\[
-CW^\dagger C^T=CBB^TC^T=DD^T,
-\]
-where $D=CB$. Then the approximate KRR system becomes
-\[
-(DD^T+\lambda I)\tilde\alpha=y.
-\]
-Now let $z=D^T\tilde\alpha$, then
-\[
-DD^T\tilde\alpha=Dz,
-\]
-so the system becomes
-\[
-Dz+\lambda\tilde\alpha=y.
-\]
-Solving for $\tilde\alpha$ gives
-\[
-\tilde\alpha=\frac{1}{\lambda}(y-Dz).
-\]
-Substituting this into the definition of $z$ gives
-\[
-z=D^T\left(\frac{1}{\lambda}(y-Dz)\right).
-\]
-Multiplying by $\lambda$ and rearranging gives
-\[
-(D^TD+\lambda I)z=D^Ty.
-\]
-After solving for $z$, the approximate KRR coefficient vector is recovered by
-\[
-\tilde\alpha=\frac{1}{\lambda}(y-Dz).
+\tilde\alpha=\frac{1}{\lambda}y-U\operatorname{diag}\left(\frac{\eta_j}{\lambda(\eta_j+\lambda)}\right)U^Ty.
 \]
 
-Therefore, in the singular case, the large system
+The computational cost after the columns have been selected is much smaller than
+a dense direct solve. The Cholesky factorization of $W_\nu\in\mathbb{R}^{l\times l}$ costs
+$O(l^3)$, forming $B=C_\nu L^{-T}$ costs $O(nl^2)$, and the thin SVD of
+$B\in\mathbb{R}^{n\times l}$ costs about $O(nl^2)$ \citep{trefethen1997numerical}. After having $U$ and $\Lambda$,
+evaluating $\tilde\alpha$ costs $O(nl)$. Hence the dominant cost is
 \[
-(CW^\dagger C^T+\lambda I)\tilde\alpha=y
+O(nl^2+l^3),
 \]
-is handled through the factorization
-\[
-CW^\dagger C^T=DD^T
-\]
-and reduced to the smaller system
-\[
-(D^TD+\lambda I)z=D^Ty.
-\]
-The full $n\times n$ matrix $CW^\dagger C^T$ is also never formed explicitly. The additional work is the factorization of $W^\dagger$, which only involves the small $l\times l$ matrix $W$.
+which is much smaller than solving the full dense KRR system when $l\ll n$.
 
 \subsection{Uniform sampling}
 
-The baseline method is uniform sampling. This means choosing $l$ column indices from $\{1,\ldots,n\}$ uniformly at random. It is easy to implement and cheap because no importance scores have to be computed. Its weakness is that it treats all columns equally. If some columns are much more informative than others, uniform sampling may need a larger $l$ to reach the same accuracy as a smarter strategy \citep[Lemma 8]{gittens2013revisiting}.
+The baseline method is uniform sampling. This means choosing $l$ column indices from $\{1,\ldots,n\}$ uniformly at random. It is easy to implement and cheap because no importance scores have to be computed. Its weakness is that it treats all columns equally. If some columns are much more informative than others, uniform sampling may need a larger $l$ to reach the same accuracy as a smarter strategy \citep{kumar2012sampling,gittens2016revisiting}.
 
 Before stating the theorem for the uniform sampling error bound, we define the leverage scores and coherence used in the bound. 
 
@@ -352,19 +415,19 @@ The \emph{coherence} is defined as
 \[
 \mu=\frac{n}{k}\max_{1\leq i\leq n}s_i.
 \]
-Thus $\mu$ is the scaled version of the largest leverage score \citep{gittens2013revisiting}.
+Thus $\mu$ is the scaled version of the largest leverage score \citep{drineas2012fast,gittens2016revisiting}.
 
-We also introduce the idea of best rank-$k$ approximation. From the same eigendecomposition, the best rank-$k$ approximation is
+From the same eigendecomposition, the best rank-$k$ approximation is
 \[
 K_k=U_k\Lambda_k U_k^T,
 \]
 where $U_k$ contains the eigenvectors corresponding to the $k$ largest eigenvalues as seen before. This matrix is the best rank-$k$ approximation to $K$ in spectral norm. In the Nystr\"om settings, $k$ is therefore the optimal rank we compare against while $l$ is the number of columns actually sampled. In practice $l$ should be larger than $k$, since random column sampling needs to oversample to capture the important $k$-dimensional subspace with high probability.
 
-The leverage score measures how concentrated the leading eigenspace is in a few rows. If the scores are all similar, then $\mu$ is not large and uniform sampling has a better chance of working. If a few scores are much larger than the rest, then uniform sampling can easily miss important columns. Thus uniform sampling can be reasonable in some datasets where the leverage scores are fairly uniform. In other datasets where the leverage scores are highly nonuniform, uniform sampling can be much worse \citep[Lemma 8]{gittens2013revisiting}. This is why uniform sampling is a natural baseline method but not necessarily the best method.
+The leverage score measures how concentrated the leading eigenspace is in a few rows. If the scores are all similar, then $\mu$ is not large and uniform sampling has a better chance of working. If a few scores are much larger than the rest, then uniform sampling can easily miss important columns. Thus uniform sampling can be reasonable in some datasets where the leverage scores are fairly uniform. In other datasets where the leverage scores are highly nonuniform, uniform sampling can be much worse \citep{kumar2012sampling,gittens2016revisiting}. This is why uniform sampling is a natural baseline method but not necessarily the best method.
 
-Finally we have the theorem, and it uses two probability parameters. The failure probability $\delta$ controls how likely it is that the random sampling guarantee fails, so a smaller $\delta$ means higher confidence. The accuracy factor $\epsilon$ controls the sampling condition, a smaller $\epsilon$ represents a stronger guarantee and therefore require more columns to be sampled\citep[Lemma 8]{gittens2013revisiting}.
+Finally we have the theorem, and it uses two probability parameters. The failure probability $\delta$ controls how likely it is that the random sampling guarantee fails, so a smaller $\delta$ means higher confidence. The accuracy factor $\epsilon$ controls the sampling condition, a smaller $\epsilon$ represents a stronger guarantee and therefore requires more columns to be sampled.
 
-\begin{theorem}[Uniform sampling]
+\begin{theorem}[Uniform sampling; \citealp{gittens2016revisiting}, Lemma 8]
 Let $K\in\mathbb{R}^{n\times n}$ be positive semidefinite, and let $K_k$ be its best rank-$k$ approximation. Fix a failure probability $\delta$ and an accuracy factor $\epsilon$ both in $(0,1)$. Suppose $l$ columns are sampled uniformly at random, then
 \[
 C=KS=K_{:,I},\qquad W=S^TKS=K_{I,I}.
@@ -381,11 +444,11 @@ then, with probability at least $1-3\delta$, the Nystr\"om approximation $\tilde
 
 This bound for $l$ fits the intuition as it shows us when $\mu$ is large we need to sample more columns. This is exactly the point that uniform sampling does not know which columns are important so when the coherence is large it needs more columns to capture the essential structure.
 
-In the first experiments we test uniform sampling. For each $l$, the approximation quality can be measured directly by a relative forward error, for example
-\[
-\frac{\|K-\tilde K\|_F}{\|K\|_F}.
-\]
-It is also important to measure the effect on prediction. So the approximation is also judged by what happens when $\tilde K$ is used in place of $K$ in the regularized system, this is done by solving the system with $\tilde K$ and then measuring the test error of the result.
+%In the first experiments we test uniform sampling. For each $l$, the approximation quality can be measured directly by a relative forward error, for example
+%\[
+%\frac{\|K-\tilde K\|_F}{\|K\|_F}.
+%\]
+%It is also important to measure the effect on prediction. So the approximation is also judged by what happens when $\tilde K$ is used in place of $K$ in the regularized system, this is done by solving the system with $\tilde K$ and then measuring the test error of the result.
 
 \subsection{Leverage score sampling}
 
@@ -396,29 +459,34 @@ The full leverage score version is the most informed method. It uses all of $K$ 
 \item construct the full kernel matrix $K$;
 \item compute the leading eigenvectors $U_k$ where $U_k$ comes from the eigendecomposition $K=U\Lambda U^T$ as before;
 \item compute the squared row norms $s_i=\|U_k(i,:)\|_2^2$;
-\item compute probabilities $p_i=\frac{s_i}{\sum_j s_j}$;
-\item sample columns according to these probabilities.
-\end{enumerate}
+\item since $U_k$ has $k$ orthonormal columns, $\sum_{j=1}^n s_j=\|U_k\|_F^2=k,$ compute exact leverage score probabilities $p_i=\frac{s_i}{\sum_j s_j}=\frac{1}{k}\|U_k(i,:)\|_2^2$;
+\item sample columns with probabilities $p_i$.
+\end{enumerate} \citep{drineas2012fast,gittens2016revisiting}
 
 This method is expensive because it requires the full matrix and the leading eigenvectors. But it is still useful as a reference method. It says what the informed sampling distribution would be if the important eigenspace was already known.
 
-\begin{theorem}[Leverage score sampling]
+\begin{theorem}[Leverage score sampling; \citealp{gittens2016revisiting}, Lemma~5]
 Let $K\in\mathbb{R}^{n\times n}$ be positive semidefinite and let $U_k$ contain the leading $k$ eigenvectors. Suppose columns are sampled with probabilities satisfying
 \[
 p_i\geq\frac{\beta}{k}\|U_k(i,:)\|_2^2
-\]
-for some $\beta\in(0,1]$. If the number of sampled columns has order
+\] for some $\beta\in(0,1]$.
+Fix a failure probability $\delta\in(0,1]$ and an approximation factor $\epsilon\in(0,1]$. If
 \[
-l=\mathcal{O}\left(\frac{k\log(k/\beta)}{\beta\epsilon^2}\right),
+l\geq \frac{3200}{\beta\epsilon^2}k \log\left(\frac{4k}{\beta\delta}\right),
 \]
-then the Nystr\"om approximation satisfies 
+then with probability at least $1-6\delta-0.6$, the Nystr\"om approximation satisfies
 \[
 \|K-\tilde K\|_2 \leq \|K-K_k\|_2+\epsilon^2\|K-K_k\|_*,
-\]
-where $\epsilon$ is a fixed approximation factor and $\|\cdot\|_*$ denotes the nuclear norm which is the sum of a matrix's singular values.
+\] where $\|\cdot\|_*$ denotes the nuclear norm which is the sum of a matrix's singular values.
 \end{theorem}
 
-This theorem can be compared with the uniform sampling theorem. In the uniform sampling theorem, the required number of columns depends on the coherence $\mu$, because uniform sampling does not know which columns are important. In the leverage score result, the sampling probabilities depend on the row norm scores $\|U_k(i,:)\|_2^2$, so the sample-size condition no longer has the same coherence factor \citep{gittens2013revisiting}.
+If we denote the exact leverage score probability as
+\[
+q_i=\frac{1}{k}\|U_k(i,:)\|_2^2
+\] and look at the probability bound. The condition $p_i\geq \beta q_i$ and $\beta\in(0,1]$ allows the theorem to use approximate probabilities, i.e. approximate leverage scores which will be seen later. The parameter $\beta$ measures their quality where $\beta=1$ gives the exact leverage score distribution, while a smaller $\beta$ allows greater underestimation and thus requires more sampled columns \citep{gittens2016revisiting}.
+
+This theorem can be compared with the uniform sampling theorem. In the uniform sampling theorem, the required number of columns depends on the coherence $\mu$, because uniform sampling does not know which columns are important. In the leverage score result, the sampling probabilities depend on the row norm scores $\|U_k(i,:)\|_2^2$, so the sample-size condition no longer has the same coherence factor \citep{gittens2016revisiting}.
 
 The term $\|K-K_k\|_2$ is the spectral norm error of the best rank-$k$ approximation, so this is the error that's unavoidable if only rank $k$ information is kept. The theorem says that leverage score sampling can get close to this best rank-$k$ error, with an additional tail term $\epsilon^2\|K-K_k\|_*.$ This extra term depends on the nuclear norm of the remaining tail. Therefore, if the eigenvalues after the first $k$ are small, the additive term is also small. 
 
+The theoretical advantage of leverage score sampling is therefore that it adapts to the nonuniformity of the leading eigenspace. Unlike the uniform sampling condition in Theorem 3.2, the required sample size does not contain the coherence factor $\mu$. Therefore when the leading eigenspace is concentrated in a small number of coordinates, leverage score sampling can target these important columns directly.

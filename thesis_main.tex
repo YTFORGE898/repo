@@ -19,6 +19,16 @@
 \usepackage{titlesec}
 \usepackage{xcolor}
 \usepackage{natbib}
+\usepackage{float}
+\usepackage{placeins}
+
+\usepackage{algorithm,algpseudocode,algorithmicx}
+\usepackage{xcolor}
+
+\renewcommand{\algorithmicrequire}{\textbf{Input:}}
+\renewcommand{\algorithmicensure}{\textbf{Output:}}
+\algrenewcommand{\algorithmiccomment}[1]{\hfill \textcolor{blue}{$\vartriangleright$ \textit{#1}}}
+
 \usepackage[colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue]{hyperref}
 \newtheorem{theorem}{Theorem}[chapter]
 \theoremstyle{definition}
@@ -69,26 +79,43 @@
 \begingroup
 \fontsize{28}{34}\selectfont
 \setstretch{1.05}
-\parbox{15.5cm}{\textBF{Randomized approaches to approximating solutions of large kernel systems for Kernel Ridge Regression using the Nystr\"om method}}
-\endgroup}
+\parbox{15.5cm}{\textBF{Randomized approaches to approximating solutions of large kernel systems for Kernel Ridge Regression using the Nystr\"om Approximation}}
+\endgroup
+}
 \date{}
 \author{}
+\begingroup
+\let\newpage\relax
 \maketitle
+\endgroup
 \vspace{-1.5cm}
-\hspace{4cm}\parbox[b][15cm][b]{8cm}{\textDF{\large\setstretch{1.5}
+\hspace{4cm}\parbox[b][15cm][b]{8cm}{
+\textDF{\large\setstretch{1.5}
 Bachelor's Project Mathematics\\
 April 2026\\
-Student: Y. Tao\\
+Student: Yuanhu Charles Tao\\
+Student number: 5350980\\
 First supervisor: Dr. M. Meier\\
-Second supervisor: Prof. J.G. Peypouquet}}
+Second supervisor: Prof. J.G. Peypouquet}
+}
 \end{titlepage}
 \restoregeometry
+
 \clearpage
 
 \chapter*{Abstract}
-Kernel ridge regression leads to a linear system involving the full kernel matrix $K$. This matrix has size $n \times n$, so forming and storing it becomes expensive when the number of data points is large. This project studies randomized Nystr\"om approximations, where only $l \ll n$ columns of $K$ are used to build a low-rank approximation. The aim is to compare how the choice of sampled columns and the number of sampled columns affect accuracy, runtime, memory use, conditioning, and solver behaviour. \citep{gittens2013revisiting}
+Kernel ridge regression uses a kernel function to measure pairwise similarities between $n$ data points, and these values form the $n\times n$ kernel matrix $K$. This leads to a linear system involving the matrix $K$. For large datasets, the main computational difficulty is the need to explicitly form the full matrix $K$ and directly solve the system. This project therefore studies randomized Nystr\"om approximations, where only $l \ll n$ columns of $K$ are used to build a low rank approximation. Uniform sampling, approximate leverage score sampling and recursive ridge leverage score sampling were compared against a full KRR baseline. The final experiments used five independent column selections on the three datasets. Uniform sampling was the strongest practical baseline and performed similarly to the informed methods with almost no sampling cost. The required value of $l$ varied strongly across datasets, but the experiments generally showed diminishing returns as $l$ increased. These results suggest using uniform sampling as the default but no universal value of $l$ can be recommended across datasets.
 
 \clearpage
+
+\chapter*{Acknowledgements}
+
+I would like to express my sincerest gratitude to my first supervisor, Dr. Maike Meier, for her guidance and support throughout this project. Our weekly meetings, together with the materials and detailed feedback she provided, were essential to the development of this thesis. I am especially grateful for her understanding during a difficult period with my health and for her support in arranging an extension, which gave me the opportunity to complete the project to the best of my ability. I also greatly appreciated her making time to attend both my practice presentation and final presentation while she was on leave.
+
+I would also like to thank Prof. Juan Peypouquet for his valuable feedback during the final presentation, particularly his suggestion to repeat the randomized experiments and report their variability, which significantly strengthened the experimental results.
+
+\clearpage
+
 
 \tableofcontents
 
@@ -97,7 +124,10 @@ Kernel ridge regression leads to a linear system involving the full kernel matri
 \input{chapters/01_introduction}
 \input{chapters/02_krr}
 \input{chapters/03_nystrom}
-\input{chapters/04_approx_lev}
+\input{chapters/04_approx_lev_recursive_rls}
+\input{chapters/05_results_analysis}
+\input{chapters/06_conclusions}
+
 
 \clearpage
 

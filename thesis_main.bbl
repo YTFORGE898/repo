@@ -5,17 +5,45 @@ Alaoui, A. and Mahoney, M.~W. (2015).
 \newblock Fast randomized kernel ridge regression with statistical guarantees.
 \newblock {\em Advances in neural information processing systems}, 28.
 
+\bibitem[Aronszajn, 1950]{aronszajn1950theory}
+Aronszajn, N. (1950).
+\newblock Theory of reproducing kernels.
+\newblock {\em Transactions of the American mathematical society},
+  68(3):337--404.
+
+\bibitem[Bach, 2013]{bach2013sharp}
+Bach, F. (2013).
+\newblock Sharp analysis of low-rank kernel matrix approximations.
+\newblock In {\em Conference on learning theory}, pages 185--209. PMLR.
+
 \bibitem[Calandriello et~al., 2017]{calandriello2017distributed}
 Calandriello, D., Lazaric, A., and Valko, M. (2017).
 \newblock Distributed adaptive sampling for kernel matrix approximation.
 \newblock In {\em Artificial Intelligence and Statistics}, pages 1421--1429.
   PMLR.
 
+\bibitem[Cortes et~al., 2010]{cortes2010impact}
+Cortes, C., Mohri, M., and Talwalkar, A. (2010).
+\newblock On the impact of kernel approximation on learning accuracy.
+\newblock In {\em Proceedings of the thirteenth international conference on
+  artificial intelligence and statistics}, pages 113--120. JMLR Workshop and
+  Conference Proceedings.
+
+\bibitem[Drineas et~al., 2012]{drineas2012fast}
+Drineas, P., Magdon-Ismail, M., Mahoney, M.~W., and Woodruff, D.~P. (2012).
+\newblock Fast approximation of matrix coherence and statistical leverage.
+\newblock {\em The Journal of Machine Learning Research}, 13(1):3475--3506.
+
 \bibitem[Drineas et~al., 2005]{drineas2005nystrom}
 Drineas, P., Mahoney, M.~W., and Cristianini, N. (2005).
 \newblock On the nystr{\"o}m method for approximating a gram matrix for
   improved kernel-based learning.
 \newblock {\em journal of machine learning research}, 6(12).
+
+\bibitem[Eckart and Young, 1936]{eckart1936approximation}
+Eckart, C. and Young, G. (1936).
+\newblock The approximation of one matrix by another of lower rank.
+\newblock {\em Psychometrika}, 1(3):211--218.
 
 \bibitem[Gittens and Mahoney, 2013]{gittens2013revisiting}
 Gittens, A. and Mahoney, M. (2013).
@@ -24,11 +52,45 @@ Gittens, A. and Mahoney, M. (2013).
 \newblock In {\em International Conference on Machine Learning}, pages
   567--575. PMLR.
 
+\bibitem[Gittens and Mahoney, 2016]{gittens2016revisiting}
+Gittens, A. and Mahoney, M.~W. (2016).
+\newblock Revisiting the nystr{\"o}m method for improved large-scale machine
+  learning.
+\newblock {\em Journal of Machine Learning Research}, 17:1--65.
+
+\bibitem[Graf et~al., 2011]{relative_location_of_ct_slices_on_axial_axis_206}
+Graf, F., Kriegel, H.-P., Schubert, M., Poelsterl, S., and Cavallaro, A.
+  (2011).
+\newblock {Relative location of CT slices on axial axis}.
+\newblock UCI Machine Learning Repository.
+\newblock {DOI}: https://doi.org/10.24432/C5CP6G.
+
+\bibitem[Halko et~al., 2011]{troppfinding}
+Halko, N., Martinsson, P.-G., and Tropp, J.~A. (2011).
+\newblock Finding structure with randomness: Probabilistic algorithms for
+  constructing approximate matrix decompositions.
+\newblock {\em SIAM review}, 53(2):217--288.
+
 \bibitem[Hamidieh, 2018]{superconductivty_data_464}
 Hamidieh, K. (2018).
 \newblock {Superconductivty Data}.
 \newblock UCI Machine Learning Repository.
 \newblock {DOI}: https://doi.org/10.24432/C53P47.
+
+\bibitem[Hofmann et~al., 2008]{hofmann2008kernel}
+Hofmann, T., Sch{\"o}lkopf, B., and Smola, A.~J. (2008).
+\newblock Kernel methods in machine learning.
+
+\bibitem[Kimeldorf and Wahba, 1971]{kimeldorf1971some}
+Kimeldorf, G. and Wahba, G. (1971).
+\newblock Some results on tchebycheffian spline functions.
+\newblock {\em Journal of mathematical analysis and applications},
+  33(1):82--95.
+
+\bibitem[Kumar et~al., 2012]{kumar2012sampling}
+Kumar, S., Mohri, M., and Talwalkar, A. (2012).
+\newblock Sampling methods for the nystr{\"o}m method.
+\newblock {\em The Journal of Machine Learning Research}, 13(1):981--1006.
 
 \bibitem[Martinsson and Tropp, 2020]{martinsson2020randomized}
 Martinsson, P.-G. and Tropp, J.~A. (2020).
@@ -40,10 +102,61 @@ Musco, C. and Musco, C. (2017).
 \newblock Recursive sampling for the nystrom method.
 \newblock {\em Advances in neural information processing systems}, 30.
 
-\bibitem[scikit-learn developers, 2026]{sklearn}
-scikit-learn developers (2026).
-\newblock skylearn.metrics.
-\newblock scikit-learn API.
+\bibitem[Nystr{\"o}m, 1930]{nystrom1930practical}
+Nystr{\"o}m, E.~J. (1930).
+\newblock {\"U}ber die praktische aufl{\"o}sung von integralgleichungen mit
+  anwendungen auf randwertaufgaben.
+
+\bibitem[Penrose, 1955]{penrose1955generalized}
+Penrose, R. (1955).
+\newblock A generalized inverse for matrices.
+\newblock In {\em Mathematical proceedings of the Cambridge philosophical
+  society}, volume~51, pages 406--413. Cambridge University Press.
+
+\bibitem[Rana,
+  2013]{physicochemical_properties_of_protein_tertiary_structure_265}
+Rana, P. (2013).
+\newblock {Physicochemical Properties of Protein Tertiary Structure}.
+\newblock UCI Machine Learning Repository.
+\newblock {DOI}: https://doi.org/10.24432/C5QW3H.
+
+\bibitem[Rudi et~al., 2015]{rudi2015less}
+Rudi, A., Camoriano, R., and Rosasco, L. (2015).
+\newblock Less is more: Nystr{\"o}m computational regularization.
+\newblock {\em Advances in neural information processing systems}, 28.
+
+\bibitem[Rudi et~al., 2017]{rudi2017falkon}
+Rudi, A., Carratino, L., and Rosasco, L. (2017).
+\newblock Falkon: An optimal large scale kernel method.
+\newblock {\em Advances in neural information processing systems}, 30.
+
+\bibitem[Saunders et~al., 1998]{saunders1998ridge}
+Saunders, C., Gammerman, A., and Vovk, V. (1998).
+\newblock Ridge regression learning algorithm in dual variables.
+
+\bibitem[Sch{\"o}lkopf et~al., 2001]{scholkopf2001generalized}
+Sch{\"o}lkopf, B., Herbrich, R., and Smola, A.~J. (2001).
+\newblock A generalized representer theorem.
+\newblock In {\em International conference on computational learning theory},
+  pages 416--426. Springer.
+
+\bibitem[Trefethen and Bau, 1997]{trefethen1997numerical}
+Trefethen, L. and Bau, D. (1997).
+\newblock {\em Numerical Linear Algebra}.
+\newblock Other Titles in Applied Mathematics. Society for Industrial and
+  Applied Mathematics (SIAM, 3600 Market Street, Floor 6, Philadelphia, PA
+  19104).
+
+\bibitem[Williams and Seeger, 2000]{williams2000using}
+Williams, C. and Seeger, M. (2000).
+\newblock Using the nystr{\"o}m method to speed up kernel machines.
+\newblock {\em Advances in neural information processing systems}, 13.
+
+\bibitem[Zhang, 2005]{zhang2005learning}
+Zhang, T. (2005).
+\newblock Learning bounds for kernel regression using effective data
+  dimensionality.
+\newblock {\em Neural computation}, 17(9):2077--2098.
 
 \bibitem[Zhu, 2023]{zhu2023rkhs}
 Zhu, R. (2023).

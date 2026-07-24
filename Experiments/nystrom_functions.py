@@ -84,9 +84,19 @@ def approximate_leverage_kernel(X, kernel, ini_l, extra_l, rng):
     sample_ind = np.concatenate([ini_ind, extra_ind])
     return sample_ind, scores, ini_ind
 
+def kernel_diag(X, kernel):
+    K_diag = np.empty(X.shape[0])
 
-def recursive_nystrom(X, kernel, lam, delta, rng, base_size=None):
+    for i in range(X.shape[0]):
+        K_diag[i] = kernel(X[i:i+1], X[i:i+1])[0, 0]
+
+    return K_diag
+
+def recursive_nystrom(X, kernel, lam, delta, rng, K_diag, base_size=None):
     m = X.shape[0]
+
+    if K_diag is None:
+        K_diag = kernel_diag(X, kernel)
 
     if base_size is None:
         threshold = 192 * np.log(1 / delta)
@@ -111,6 +121,7 @@ def recursive_nystrom(X, kernel, lam, delta, rng, base_size=None):
         lam,
         delta / 3,
         rng,
+        K_diag[half_ind],
         base_size
     )
 
@@ -124,11 +135,6 @@ def recursive_nystrom(X, kernel, lam, delta, rng, base_size=None):
     A = W + lam * np.eye(len(inner_ind))
     Z = np.linalg.solve(A, C.T)
     diag_part = np.sum(C * Z.T, axis=1)
-    K_diag = np.empty(m)
-
-    for i in range(m):
-        K_diag[i] = kernel(X[i:i+1], X[i:i+1])[0, 0]
-
     score = (3 / (2 * lam)) * (K_diag - diag_part)
     score = np.maximum(score, 0)
     score_sum = score.sum()
